@@ -4,9 +4,8 @@ Petite application web personnelle qui enregistre les aliments, leur emplacement
 
 ## Lancer l’application
 
-Publier le dossier avec GitHub Pages (HTTPS est nécessaire pour accéder à la caméra sur iPhone), puis ouvrir l’adresse sur Safari. Les données restent dans le navigateur de l’appareil.
+Publier le dossier avec GitHub Pages (HTTPS est nécessaire pour accéder à la caméra sur iPhone), puis ouvrir l’adresse sur Safari. La connexion par lien e-mail protège et synchronise les données du frigo.
 
 ## Suite prévue
 
-1. Synchroniser les données dans une base privée.
-2. Créer un calendrier personnel avec des rappels sur iPhone.
+1. Créer un calendrier personnel avec des rappels sur iPhone.

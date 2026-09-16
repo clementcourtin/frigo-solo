@@ -7,6 +7,10 @@ h1 { margin: 0; font-size: clamp(2rem, 8vw, 3.35rem); line-height: 1.02; letter-
 .intro { margin: 18px 0 35px; color: #67645b; font-size: 1.05rem; }
 h2 { margin: 0; font-size: 1.05rem; }
 .add-card { padding: 22px; border-radius: 22px; background: #fffdf8; box-shadow: 0 8px 30px #413b2c0d; }
+.auth-card { margin-bottom: 18px; padding: 22px; border-radius: 22px; background: #e7f1e0; }
+.auth-card > p { margin: 9px 0 0; color: #596653; line-height: 1.4; }
+.auth-form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 10px; margin-top: 17px; }
+.auth-form button { padding: 0 16px; }
 form { display: grid; gap: 15px; margin-top: 18px; }
 label { display: grid; gap: 7px; font-size: .87rem; font-weight: 700; }
 .optional { color: #857f73; font-weight: 500; }
@@ -40,4 +44,4 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .food-copy .food-meta { color: #386a2e; font-size: .8rem; font-weight: 750; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
-@media (max-width: 390px) { .barcode-row, .details-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }
+@media (max-width: 480px) { .barcode-row, .details-row, .auth-form { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }

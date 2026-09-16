@@ -15,7 +15,23 @@
         <p class="intro">Garde simplement un œil sur ce que tu as chez toi.</p>
       </header>
 
-      <section class="add-card" aria-labelledby="add-title">
+      <section id="auth-card" class="auth-card" aria-labelledby="auth-title">
+        <h2 id="auth-title">Synchroniser ton frigo</h2>
+        <p id="auth-description">Entre ton e-mail : tu recevras un lien de connexion, sans mot de passe à retenir.</p>
+        <form id="auth-form" class="auth-form">
+          <label>E-mail
+            <input id="email" type="email" autocomplete="email" placeholder="toi@exemple.com" required />
+          </label>
+          <button type="submit">M’envoyer le lien</button>
+        </form>
+        <div id="signed-in" hidden>
+          <p id="signed-in-email" class="hint"></p>
+          <button id="sign-out" class="secondary-button" type="button">Se déconnecter</button>
+        </div>
+        <p id="auth-message" class="hint" aria-live="polite"></p>
+      </section>
+
+      <section id="food-card" class="add-card" aria-labelledby="add-title" hidden>
         <h2 id="add-title">Ajouter un aliment</h2>
         <form id="food-form">
           <div class="scan-area">
@@ -77,6 +93,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
