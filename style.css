@@ -10,7 +10,7 @@ h2 { margin: 0; font-size: 1.05rem; }
 form { display: grid; gap: 15px; margin-top: 18px; }
 label { display: grid; gap: 7px; font-size: .87rem; font-weight: 700; }
 .optional { color: #857f73; font-weight: 500; }
-input { width: 100%; min-height: 48px; border: 1px solid #dedbd1; border-radius: 11px; padding: 0 13px; background: #fff; color: inherit; font: inherit; }
+input, select { width: 100%; min-height: 48px; border: 1px solid #dedbd1; border-radius: 11px; padding: 0 13px; background: #fff; color: inherit; font: inherit; }
 input:focus { outline: 3px solid #d8ebc9; border-color: #77a358; }
 button { min-height: 48px; border: 0; border-radius: 11px; background: #386a2e; color: white; font: inherit; font-weight: 800; cursor: pointer; }
 button:hover { background: #285321; }
@@ -19,6 +19,9 @@ button:hover { background: #285321; }
 .barcode-row { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 10px; }
 .lookup-button { min-height: 48px; padding: 0 16px; background: #ebe8df; color: #39362e; }
 .lookup-button:hover { background: #ddd8cc; }
+.details-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.quantity-inputs { display: grid; grid-template-columns: minmax(0, 1fr) 82px; gap: 7px; }
+.quantity-inputs select { padding: 0 8px; }
 .hint { margin: 8px 0 0; color: #7a7569; font-size: .82rem; line-height: 1.35; }
 #scanner { overflow: hidden; margin-top: 13px; border-radius: 13px; background: #20241e; }
 #scanner video { display: block; width: 100%; }
@@ -34,6 +37,7 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .food-item.today .status-dot, .food-item.expired .status-dot { background: #cf4d3d; }
 .food-copy { display: grid; gap: 3px; }
 .food-copy span { color: #716d63; font-size: .87rem; }
+.food-copy .food-meta { color: #386a2e; font-size: .8rem; font-weight: 750; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
-@media (max-width: 390px) { .barcode-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }
+@media (max-width: 390px) { .barcode-row, .details-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }

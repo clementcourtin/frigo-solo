@@ -32,6 +32,27 @@
           <label>Nom de l’aliment
             <input id="food-name" name="name" placeholder="Ex. Mozzarella" required maxlength="70" autocomplete="off" />
           </label>
+          <div class="details-row">
+            <label>Où est-il ?
+              <select id="food-location" name="location">
+                <option value="Frigo">Frigo</option>
+                <option value="Congélateur">Congélateur</option>
+                <option value="Placard">Placard</option>
+              </select>
+            </label>
+            <label>Quantité
+              <div class="quantity-inputs">
+                <input id="food-quantity" name="quantity" type="number" min="0.01" step="0.01" value="1" required />
+                <select id="food-unit" name="unit" aria-label="Unité">
+                  <option value="unité">unité</option>
+                  <option value="g">g</option>
+                  <option value="kg">kg</option>
+                  <option value="ml">ml</option>
+                  <option value="L">L</option>
+                </select>
+              </div>
+            </label>
+          </div>
           <label>À consommer avant le
             <input id="food-date" name="date" type="date" required />
           </label>
@@ -51,7 +72,7 @@
     <template id="food-template">
       <li class="food-item">
         <div class="status-dot" aria-hidden="true"></div>
-        <div class="food-copy"><strong></strong><span></span></div>
+        <div class="food-copy"><strong></strong><span class="food-meta"></span><span class="food-date"></span></div>
         <button class="delete-button" type="button" aria-label="Supprimer">×</button>
       </li>
     </template>

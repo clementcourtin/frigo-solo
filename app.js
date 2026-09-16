@@ -2,6 +2,9 @@ const form = document.querySelector('#food-form');
 const nameInput = document.querySelector('#food-name');
 const dateInput = document.querySelector('#food-date');
 const barcodeInput = document.querySelector('#barcode');
+const locationInput = document.querySelector('#food-location');
+const quantityInput = document.querySelector('#food-quantity');
+const unitInput = document.querySelector('#food-unit');
 const lookupButton = document.querySelector('#lookup-barcode');
 const scanButton = document.querySelector('#start-scan');
 const scannerElement = document.querySelector('#scanner');
@@ -107,6 +110,12 @@ function status(days) {
 
 function save() { localStorage.setItem(storageKey, JSON.stringify(entries)); }
 
+function quantityLabel(entry) {
+  const quantity = Number(entry.quantity || 1);
+  const unit = entry.unit || 'unité';
+  return `${quantity} ${unit}${unit === 'unité' && quantity > 1 ? 's' : ''} · ${entry.location || 'Frigo'}`;
+}
+
 function render() {
   entries.sort((a, b) => a.date.localeCompare(b.date));
   foods.innerHTML = '';
@@ -118,7 +127,8 @@ function render() {
     const [kind, message] = status(daysUntil(entry.date));
     item.classList.add(kind);
     node.querySelector('strong').textContent = entry.name;
-    node.querySelector('span').textContent = message;
+    node.querySelector('.food-meta').textContent = quantityLabel(entry);
+    node.querySelector('.food-date').textContent = message;
     node.querySelector('.delete-button').addEventListener('click', () => {
       entries = entries.filter((item) => item.id !== entry.id);
       save(); render();
@@ -129,7 +139,11 @@ function render() {
 
 form.addEventListener('submit', (event) => {
   event.preventDefault();
-  entries.push({ id: crypto.randomUUID(), name: nameInput.value.trim(), date: dateInput.value, barcode: barcodeInput.value });
+  entries.push({
+    id: crypto.randomUUID(), name: nameInput.value.trim(), date: dateInput.value,
+    barcode: barcodeInput.value, location: locationInput.value,
+    quantity: quantityInput.value, unit: unitInput.value,
+  });
   save(); render(); form.reset(); nameInput.focus();
 });
 
