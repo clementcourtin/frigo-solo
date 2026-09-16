@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f4ed" />
+    <title>Frigo Solo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="eyebrow">FRIGO SOLO</p>
+        <h1>Qu’est-ce qu’on mange<br />avant que ça périme ?</h1>
+        <p class="intro">Garde simplement un œil sur ce que tu as chez toi.</p>
+      </header>
+
+      <section class="add-card" aria-labelledby="add-title">
+        <h2 id="add-title">Ajouter un aliment</h2>
+        <form id="food-form">
+          <div class="scan-area">
+            <button id="start-scan" class="secondary-button" type="button">Scanner un code-barres</button>
+            <p id="scan-message" class="hint" aria-live="polite">Le scan préremplit le nom du produit.</p>
+            <div id="scanner" hidden></div>
+          </div>
+          <div class="barcode-row">
+            <label>Code-barres <span class="optional">facultatif</span>
+              <input id="barcode" name="barcode" inputmode="numeric" pattern="[0-9]*" placeholder="Ex. 3017620422003" maxlength="18" autocomplete="off" />
+            </label>
+            <button id="lookup-barcode" class="lookup-button" type="button">Chercher</button>
+          </div>
+          <label>Nom de l’aliment
+            <input id="food-name" name="name" placeholder="Ex. Mozzarella" required maxlength="70" autocomplete="off" />
+          </label>
+          <label>À consommer avant le
+            <input id="food-date" name="date" type="date" required />
+          </label>
+          <button type="submit">Ajouter au frigo</button>
+        </form>
+      </section>
+
+      <section class="food-list" aria-labelledby="list-title">
+        <div class="list-heading">
+          <h2 id="list-title">À surveiller</h2>
+          <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
+        </div>
+        <p id="empty-state" class="empty">Ton frigo est vide par ici. Ajoute ton premier aliment.</p>
+        <ul id="foods" aria-live="polite"></ul>
+      </section>
+    </main>
+    <template id="food-template">
+      <li class="food-item">
+        <div class="status-dot" aria-hidden="true"></div>
+        <div class="food-copy"><strong></strong><span></span></div>
+        <button class="delete-button" type="button" aria-label="Supprimer">×</button>
+      </li>
+    </template>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
