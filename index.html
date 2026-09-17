@@ -41,7 +41,7 @@
         </form>
         <div id="auth-code-row" class="auth-code-row" hidden>
           <label>Code reçu par e-mail
-            <input id="auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" aria-label="Code de connexion à six chiffres" />
+            <input id="auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" pattern="[0-9]{8}" placeholder="12345678" aria-label="Code de connexion à huit chiffres" />
           </label>
           <button id="verify-auth-code" type="button">Me connecter</button>
         </div>
@@ -175,6 +175,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260917-pwaauthfix"></script>
+    <script type="module" src="app.js?v=20260917-pwaauth8digits"></script>
   </body>
 </html>
