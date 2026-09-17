@@ -1,7 +1,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const supabase = createClient('https://xxvxmefrrkuurlnxyxsn.supabase.co', 'sb_publishable_sb_FFicGYl7AZS8wxL8GvA_ev8j0Btp');
-const calendarEndpoint = 'https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar';
+const https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar/frigo-solo.ics;
 const $ = (s) => document.querySelector(s);
 const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email');
 const foodCard = $('#food-card'), signedIn = $('#signed-in'), signedInEmail = $('#signed-in-email');
