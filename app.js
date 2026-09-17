@@ -3,7 +3,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient('https://xxvxmefrrkuurlnxyxsn.supabase.co', 'sb_publishable_sb_FFicGYl7AZS8wxL8GvA_ev8j0Btp');
 const appUrl = `${window.location.origin}${window.location.pathname}`;
 // Un vrai chemin .ics (sans paramètre dans l’URL) est mieux accepté par Calendrier sur iPhone.
-const calendarEndpoint = 'https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar';
+const calendarEndpoint = 'https://frigo-solo-calendar.clementhealeaucrt.workers.dev';
 const $ = (s) => document.querySelector(s);
 const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email');
 const foodCard = $('#food-card'), signedInEmail = $('#signed-in-email');
