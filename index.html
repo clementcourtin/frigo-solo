@@ -35,7 +35,8 @@
       </section>
 
       <section id="food-card" class="add-card" aria-labelledby="add-title" hidden>
-        <h2 id="add-title">Ajouter un aliment</h2>
+        <p class="section-kicker">NOUVEL ARTICLE</p>
+        <h2 id="add-title">Ajouter à ton stock</h2>
         <form id="food-form">
           <div class="scan-area">
             <button id="start-scan" class="secondary-button" type="button">Scanner un code-barres</button>
@@ -86,8 +87,11 @@
       </section>
 
       <section id="food-list" class="food-list" aria-labelledby="list-title">
-        <div class="list-heading">
-          <h2 id="list-title">À surveiller</h2>
+        <div class="list-heading dashboard-heading">
+          <div>
+            <p class="section-kicker">TON FRIGO</p>
+            <h2 id="list-title">À surveiller <span id="food-count"></span></h2>
+          </div>
           <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
         </div>
         <section id="priority-section" class="priority-section" aria-labelledby="priority-title" hidden>
@@ -109,7 +113,7 @@
 
       <section id="shopping-card" class="shopping-card" aria-labelledby="shopping-title" hidden>
         <div class="list-heading">
-          <h2 id="shopping-title">Liste de courses</h2>
+          <div><p class="section-kicker">À RACHETER</p><h2 id="shopping-title">Liste de courses</h2></div>
           <button id="clear-bought" class="text-button" type="button" hidden>Effacer les cochés</button>
         </div>
         <form id="shopping-form" class="shopping-form">
@@ -143,7 +147,6 @@
           <div class="food-buttons">
             <button class="shop-button" type="button">À acheter</button>
             <button class="consume-button" type="button">Consommé</button>
-            <button class="delete-button" type="button" aria-label="Supprimer">×</button>
           </div>
         </div>
       </li>
@@ -155,6 +158,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260917-account"></script>
+    <script type="module" src="app.js?v=20260917-authfix"></script>
   </body>
 </html>
