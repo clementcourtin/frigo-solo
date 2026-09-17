@@ -13,6 +13,13 @@
         <p class="eyebrow">FRIGO SOLO</p>
         <h1>Qu’est-ce qu’on mange<br />avant que ça périme ?</h1>
         <p class="intro">Garde simplement un œil sur ce que tu as chez toi.</p>
+        <div id="account-bar" class="account-bar" hidden>
+          <span id="signed-in-email"></span>
+          <div>
+            <button id="show-calendar" class="text-button" type="button">Rappels</button>
+            <button id="sign-out" class="text-button" type="button">Se déconnecter</button>
+          </div>
+        </div>
       </header>
 
       <section id="auth-card" class="auth-card" aria-labelledby="auth-title">
@@ -24,18 +31,6 @@
           </label>
           <button type="submit">M’envoyer le lien</button>
         </form>
-        <div id="signed-in" hidden>
-          <p id="signed-in-email" class="hint"></p>
-          <div id="calendar-setup" class="calendar-setup" hidden>
-            <strong>Calendrier iPhone</strong>
-            <p class="hint">Copie ce lien, puis dans Calendrier : « Ajouter un calendrier » → « Ajouter un calendrier avec abonnement ».</p>
-            <div class="calendar-link-row">
-              <input id="calendar-link" aria-label="Lien personnel du calendrier" readonly />
-              <button id="copy-calendar-link" class="lookup-button" type="button">Copier</button>
-            </div>
-          </div>
-          <button id="sign-out" class="secondary-button" type="button">Se déconnecter</button>
-        </div>
         <p id="auth-message" class="hint" aria-live="polite"></p>
       </section>
 
@@ -90,7 +85,7 @@
         </form>
       </section>
 
-      <section class="food-list" aria-labelledby="list-title">
+      <section id="food-list" class="food-list" aria-labelledby="list-title">
         <div class="list-heading">
           <h2 id="list-title">À surveiller</h2>
           <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
@@ -123,6 +118,15 @@
         </form>
         <p id="shopping-empty" class="empty">Rien à acheter pour l’instant.</p>
         <ul id="shopping-items" class="shopping-items" aria-live="polite"></ul>
+      </section>
+
+      <section id="calendar-setup" class="calendar-setup calendar-panel" hidden>
+        <div class="list-heading"><strong>Rappels iPhone</strong><button id="hide-calendar" class="text-button" type="button">Fermer</button></div>
+        <p class="hint">Copie ce lien, puis dans Calendrier : « Ajouter un calendrier » → « Ajouter un calendrier avec abonnement ».</p>
+        <div class="calendar-link-row">
+          <input id="calendar-link" aria-label="Lien personnel du calendrier" readonly />
+          <button id="copy-calendar-link" class="lookup-button" type="button">Copier</button>
+        </div>
       </section>
     </main>
     <footer class="app-footer">© 2026 Clément Courtin · Frigo Solo</footer>
