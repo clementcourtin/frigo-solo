@@ -89,15 +89,32 @@
           <h2 id="list-title">À surveiller</h2>
           <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
         </div>
+        <section id="priority-section" class="priority-section" aria-labelledby="priority-title" hidden>
+          <div class="priority-heading">
+            <span aria-hidden="true">✦</span>
+            <h3 id="priority-title">À manger en priorité</h3>
+          </div>
+          <p id="priority-summary"></p>
+        </section>
+        <div class="location-filters" role="group" aria-label="Filtrer les aliments par emplacement">
+          <button class="filter-button active" type="button" data-location="all" aria-pressed="true">Tout</button>
+          <button class="filter-button" type="button" data-location="Frigo" aria-pressed="false">Frigo</button>
+          <button class="filter-button" type="button" data-location="Congélateur" aria-pressed="false">Congélateur</button>
+          <button class="filter-button" type="button" data-location="Placard" aria-pressed="false">Placard</button>
+        </div>
         <p id="empty-state" class="empty">Ton frigo est vide par ici. Ajoute ton premier aliment.</p>
         <ul id="foods" aria-live="polite"></ul>
       </section>
     </main>
+    <footer class="app-footer">© 2026 Clément Courtin · Frigo Solo</footer>
     <template id="food-template">
       <li class="food-item">
         <div class="status-dot" aria-hidden="true"></div>
         <div class="food-copy"><strong></strong><span class="food-meta"></span><span class="food-date"></span></div>
-        <button class="delete-button" type="button" aria-label="Supprimer">×</button>
+        <div class="item-actions">
+          <button class="consume-button" type="button">Consommé</button>
+          <button class="delete-button" type="button" aria-label="Supprimer">×</button>
+        </div>
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
