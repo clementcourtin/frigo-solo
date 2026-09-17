@@ -241,7 +241,7 @@ async function deleteShopping(id) {
 
 authForm.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: appUrl } });
-  message(authMessage, error ? 'Impossible d’envoyer le lien. Réessaie.' : 'Lien envoyé : ouvre ton e-mail puis reviens ici.', Boolean(error));
+  message(authMessage, error ? 'Impossible d’envoyer le lien. Réessaie.' : 'Lien envoyé : ouvre ton e-mail puis reviens ici. Pense aussi à vérifier tes spams.', Boolean(error));
 });
 $('#sign-out').addEventListener('click', () => supabase.auth.signOut());
 copyCalendarLink.addEventListener('click', async () => {
