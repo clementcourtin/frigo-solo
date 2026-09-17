@@ -35,6 +35,15 @@ button:hover { background: #285321; }
 #scanner video { display: block; width: 100%; }
 .food-list { margin-top: 40px; }
 .list-heading { display: flex; justify-content: space-between; align-items: center; }
+.priority-section { margin: 16px 0; padding: 15px 16px; border: 1px solid #f0d7ad; border-radius: 15px; background: #fff6e6; }
+.priority-heading { display: flex; align-items: center; gap: 8px; color: #985d12; }
+.priority-heading span { font-size: 1.1rem; }
+.priority-heading h3 { margin: 0; font-size: .95rem; }
+.priority-section p { margin: 7px 0 0; color: #6c5b41; line-height: 1.4; font-size: .9rem; }
+.location-filters { display: flex; flex-wrap: wrap; gap: 7px; margin: 16px 0 4px; }
+.filter-button { min-height: 36px; padding: 0 12px; border: 1px solid #dedbd1; background: #fffdf8; color: #625e55; font-size: .82rem; }
+.filter-button:hover { background: #f1ede4; }
+.filter-button.active { border-color: #386a2e; background: #386a2e; color: #fff; }
 .text-button { min-height: auto; padding: 0; background: none; color: #7a7569; font-size: .85rem; }
 .text-button:hover { background: none; color: #27251f; }
 .empty { color: #7a7569; line-height: 1.5; }
@@ -46,6 +55,10 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .food-copy { display: grid; gap: 3px; }
 .food-copy span { color: #716d63; font-size: .87rem; }
 .food-copy .food-meta { color: #386a2e; font-size: .8rem; font-weight: 750; }
+.item-actions { display: flex; align-items: center; gap: 7px; }
+.consume-button { min-height: 34px; padding: 0 10px; border-radius: 9px; background: #e6efdf; color: #315d2c; font-size: .78rem; }
+.consume-button:hover { background: #d8e7ce; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
-@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }
+.app-footer { padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
+@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } .food-item { align-items: start; } .item-actions { flex-direction: column; } .consume-button { min-width: 76px; } }
