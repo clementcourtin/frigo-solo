@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6f4ed" />
     <title>Frigo Solo</title>
-    <link rel="stylesheet" href="style.css?v=20260917-flow" />
+    <link rel="stylesheet" href="style.css?v=20260917-stock" />
   </head>
   <body>
     <main class="shell">
@@ -97,7 +97,7 @@
         <div class="list-heading dashboard-heading">
           <div>
             <p class="section-kicker">TON FRIGO</p>
-            <h2 id="list-title">À surveiller <span id="food-count"></span></h2>
+            <h2 id="list-title">Mon stock <span id="food-count"></span></h2>
           </div>
           <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
         </div>
@@ -127,7 +127,7 @@
         </div>
         <form id="shopping-form" class="shopping-form">
           <input id="shopping-name" maxlength="70" autocomplete="off" placeholder="Ex. Café, lessive…" required aria-label="Ajouter un article à la liste de courses" />
-          <button type="submit">Ajouter</button>
+          <button type="submit" aria-label="Ajouter à la liste de courses" title="Ajouter">＋</button>
         </form>
         <p id="shopping-empty" class="empty">Rien à acheter pour l’instant.</p>
         <ul id="shopping-items" class="shopping-items" aria-live="polite"></ul>
@@ -135,7 +135,7 @@
 
       <section id="calendar-setup" class="calendar-setup calendar-panel" hidden>
         <div class="list-heading"><strong>Tes rappels de péremption</strong><button id="hide-calendar" class="text-button" type="button">Fermer</button></div>
-        <p class="hint">Pour recevoir tes rappels sur iPhone, copie ce lien. Ouvre ensuite l’app Calendrier, puis ajoute un calendrier avec abonnement et colle-le.</p>
+        <p class="hint">Copie ce lien, puis ouvre ton application Calendrier. Ajoute un calendrier avec abonnement et colle le lien.</p>
         <div class="calendar-link-row">
           <input id="calendar-link" aria-label="Lien personnel du calendrier" readonly />
           <button id="copy-calendar-link" class="lookup-button" type="button">Copier</button>
