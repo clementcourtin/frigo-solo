@@ -12,8 +12,10 @@ const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantit
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
 const foods = $('#foods'), empty = $('#empty-state'), clearAll = $('#clear-all'), template = $('#food-template');
 const prioritySection = $('#priority-section'), prioritySummary = $('#priority-summary');
+const shoppingCard = $('#shopping-card'), shoppingForm = $('#shopping-form'), shoppingName = $('#shopping-name');
+const shoppingItems = $('#shopping-items'), shoppingEmpty = $('#shopping-empty'), clearBought = $('#clear-bought'), shoppingTemplate = $('#shopping-template');
 const filterButtons = [...document.querySelectorAll('.filter-button')];
-let entries = [], activeLocation = 'all', scanner, isScanning = false;
+let entries = [], shoppingEntries = [], activeLocation = 'all', scanner, isScanning = false;
 
 function message(target, text, error = false) { target.textContent = text; target.style.color = error ? '#9a3d31' : ''; }
 function daysUntil(date) { const t = new Date(`${date}T12:00:00`), n = new Date(); n.setHours(12, 0, 0, 0); return Math.round((t - n) / 86400000); }
@@ -24,6 +26,8 @@ function status(days) {
   return days <= 3 ? ['soon', `À consommer dans ${days} jours`] : ['later', `À consommer dans ${days} jours`];
 }
 function quantityLabel(item) { const q = Number(item.quantity || 1), u = item.unit || 'unité'; return `${q} ${u}${u === 'unité' && q > 1 ? 's' : ''} · ${item.location || 'Frigo'}`; }
+function quantityStep(item) { return ['g', 'ml'].includes(item.unit) ? 100 : ['kg', 'L'].includes(item.unit) ? 0.1 : 1; }
+function quantityText(item) { const quantity = Number(item.quantity || 1); return `${Number.isInteger(quantity) ? quantity : quantity.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} ${item.unit || 'unité'}`; }
 
 function render() {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
@@ -39,6 +43,10 @@ function render() {
     const node = template.content.cloneNode(true), row = node.querySelector('li'), [kind, label] = status(daysUntil(item.date));
     row.classList.add(kind); node.querySelector('strong').textContent = item.name;
     node.querySelector('.food-meta').textContent = quantityLabel(item); node.querySelector('.food-date').textContent = label;
+    node.querySelector('.item-quantity').textContent = quantityText(item);
+    node.querySelector('.quantity-minus').addEventListener('click', () => changeQuantity(item, -1));
+    node.querySelector('.quantity-plus').addEventListener('click', () => changeQuantity(item, 1));
+    node.querySelector('.shop-button').addEventListener('click', () => addToShopping(item.name));
     node.querySelector('.consume-button').addEventListener('click', () => consumeFood(item.id));
     node.querySelector('.delete-button').addEventListener('click', () => removeFood(item.id)); foods.append(node);
   }
@@ -47,6 +55,24 @@ async function loadFoods() {
   const { data, error } = await supabase.from('food_items').select('*').order('expires_on');
   if (error) return message(authMessage, 'Impossible de charger ton frigo. Réessaie dans un instant.', true);
   entries = data.map((item) => ({ ...item, date: item.expires_on })); render();
+}
+function renderShopping() {
+  shoppingItems.innerHTML = '';
+  shoppingEmpty.hidden = Boolean(shoppingEntries.length);
+  clearBought.hidden = !shoppingEntries.some((item) => item.checked);
+  for (const item of shoppingEntries) {
+    const node = shoppingTemplate.content.cloneNode(true), row = node.querySelector('li'), checkbox = node.querySelector('.shopping-check');
+    row.classList.toggle('done', item.checked); checkbox.checked = item.checked;
+    node.querySelector('.shopping-label').textContent = item.name;
+    checkbox.addEventListener('change', () => toggleShopping(item.id, checkbox.checked));
+    node.querySelector('.shopping-delete').addEventListener('click', () => deleteShopping(item.id));
+    shoppingItems.append(node);
+  }
+}
+async function loadShopping() {
+  const { data, error } = await supabase.from('shopping_items').select('*').order('created_at');
+  if (error) return message(authMessage, 'Impossible de charger la liste de courses.', true);
+  shoppingEntries = data; renderShopping();
 }
 async function setCalendarLink() {
   const { data: existing, error: readError } = await supabase.from('calendar_feeds').select('token').maybeSingle();
@@ -58,8 +84,9 @@ async function setCalendarLink() {
 }
 async function setSession(session) {
   const user = session?.user, connected = Boolean(user); foodCard.hidden = !connected; authForm.hidden = connected; signedIn.hidden = !connected;
-  if (connected) { signedInEmail.textContent = `Connecté avec ${user.email}`; message(authMessage, 'Ton frigo est synchronisé.'); await Promise.all([loadFoods(), setCalendarLink()]); }
-  else { entries = []; render(); calendarSetup.hidden = true; message(authMessage, ''); }
+  shoppingCard.hidden = !connected;
+  if (connected) { signedInEmail.textContent = `Connecté avec ${user.email}`; message(authMessage, 'Ton frigo est synchronisé.'); await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
+  else { entries = []; shoppingEntries = []; render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
 
 async function lookupProduct(code) {
@@ -90,6 +117,29 @@ async function consumeFood(id) {
   message(authMessage, 'Bon appétit ! Aliment retiré du frigo.');
   loadFoods();
 }
+async function changeQuantity(item, direction) {
+  const step = quantityStep(item), current = Number(item.quantity || 1);
+  const next = Math.max(step, Math.round((current + direction * step) * 100) / 100);
+  if (next === current) return;
+  const { error } = await supabase.from('food_items').update({ quantity: next }).eq('id', item.id);
+  if (error) return message(authMessage, 'Impossible de modifier la quantité.', true);
+  loadFoods();
+}
+async function addToShopping(name) {
+  const { error } = await supabase.from('shopping_items').insert({ name });
+  if (error) return message(authMessage, 'Impossible d’ajouter cet article à la liste de courses.', true);
+  message(authMessage, `« ${name} » a été ajouté à la liste de courses.`); loadShopping();
+}
+async function toggleShopping(id, checked) {
+  const { error } = await supabase.from('shopping_items').update({ checked }).eq('id', id);
+  if (error) return message(authMessage, 'Impossible de mettre à jour la liste de courses.', true);
+  loadShopping();
+}
+async function deleteShopping(id) {
+  const { error } = await supabase.from('shopping_items').delete().eq('id', id);
+  if (error) return message(authMessage, 'Impossible de supprimer cet article.', true);
+  loadShopping();
+}
 
 authForm.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: window.location.href } });
@@ -110,6 +160,18 @@ clearAll.addEventListener('click', async () => {
   if (!confirm('Supprimer tous les aliments ?')) return;
   const { error } = await supabase.from('food_items').delete().in('id', entries.map((item) => item.id));
   if (error) return message(authMessage, 'Impossible de vider le frigo.', true); loadFoods();
+});
+shoppingForm.addEventListener('submit', async (event) => {
+  event.preventDefault(); const name = shoppingName.value.trim();
+  if (!name) return;
+  await addToShopping(name); shoppingForm.reset(); shoppingName.focus();
+});
+clearBought.addEventListener('click', async () => {
+  const boughtIds = shoppingEntries.filter((item) => item.checked).map((item) => item.id);
+  if (!boughtIds.length) return;
+  const { error } = await supabase.from('shopping_items').delete().in('id', boughtIds);
+  if (error) return message(authMessage, 'Impossible d’effacer les articles cochés.', true);
+  loadShopping();
 });
 filterButtons.forEach((button) => button.addEventListener('click', () => {
   activeLocation = button.dataset.location;
