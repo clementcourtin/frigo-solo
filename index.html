@@ -105,6 +105,19 @@
         <p id="empty-state" class="empty">Ton frigo est vide par ici. Ajoute ton premier aliment.</p>
         <ul id="foods" aria-live="polite"></ul>
       </section>
+
+      <section id="shopping-card" class="shopping-card" aria-labelledby="shopping-title" hidden>
+        <div class="list-heading">
+          <h2 id="shopping-title">Liste de courses</h2>
+          <button id="clear-bought" class="text-button" type="button" hidden>Effacer les cochés</button>
+        </div>
+        <form id="shopping-form" class="shopping-form">
+          <input id="shopping-name" maxlength="70" autocomplete="off" placeholder="Ex. Café, lessive…" required aria-label="Ajouter un article à la liste de courses" />
+          <button type="submit">Ajouter</button>
+        </form>
+        <p id="shopping-empty" class="empty">Rien à acheter pour l’instant.</p>
+        <ul id="shopping-items" class="shopping-items" aria-live="polite"></ul>
+      </section>
     </main>
     <footer class="app-footer">© 2026 Clément Courtin · Frigo Solo</footer>
     <template id="food-template">
@@ -112,9 +125,23 @@
         <div class="status-dot" aria-hidden="true"></div>
         <div class="food-copy"><strong></strong><span class="food-meta"></span><span class="food-date"></span></div>
         <div class="item-actions">
-          <button class="consume-button" type="button">Consommé</button>
-          <button class="delete-button" type="button" aria-label="Supprimer">×</button>
+          <div class="quantity-control" aria-label="Modifier la quantité">
+            <button class="quantity-button quantity-minus" type="button" aria-label="Réduire la quantité">−</button>
+            <span class="item-quantity"></span>
+            <button class="quantity-button quantity-plus" type="button" aria-label="Augmenter la quantité">+</button>
+          </div>
+          <div class="food-buttons">
+            <button class="shop-button" type="button">À acheter</button>
+            <button class="consume-button" type="button">Consommé</button>
+            <button class="delete-button" type="button" aria-label="Supprimer">×</button>
+          </div>
         </div>
+      </li>
+    </template>
+    <template id="shopping-template">
+      <li class="shopping-item">
+        <label><input class="shopping-check" type="checkbox" /><span class="shopping-label"></span></label>
+        <button class="delete-button shopping-delete" type="button" aria-label="Supprimer">×</button>
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
