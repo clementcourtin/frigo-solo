@@ -5,7 +5,7 @@ const appUrl = `${window.location.origin}${window.location.pathname}`;
 // Un vrai chemin .ics (sans paramètre dans l’URL) est mieux accepté par Calendrier sur iPhone.
 const calendarEndpoint = 'https://frigo-solo-calendar.clementhealeaucrt.workers.dev';
 const $ = (s) => document.querySelector(s);
-const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email');
+const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email'), authCodeRow = $('#auth-code-row'), authCode = $('#auth-code'), verifyAuthCode = $('#verify-auth-code');
 const foodDialog = $('#food-dialog'), addTrigger = $('#open-add'), closeAdd = $('#close-add'), signedInEmail = $('#signed-in-email');
 const authMessage = $('#auth-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
@@ -92,7 +92,7 @@ async function setCalendarLink() {
   calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
 async function setSession(session) {
-  const user = session?.user, connected = Boolean(user); addTrigger.hidden = !connected; authCard.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
+  const user = session?.user, connected = Boolean(user); addTrigger.hidden = !connected; authCard.hidden = connected; authCodeRow.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
   if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
   else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; if (foodDialog.open) foodDialog.close(); render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
@@ -214,8 +214,20 @@ async function deleteShopping(id) {
 
 authForm.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: appUrl } });
-  message(authMessage, error ? 'Impossible d’envoyer le lien. Réessaie.' : 'Lien envoyé : ouvre ton e-mail puis reviens ici. Pense aussi à vérifier tes spams.', Boolean(error));
+  if (error) return message(authMessage, 'Impossible d’envoyer le code. Réessaie.', true);
+  authCodeRow.hidden = false; authCode.value = ''; authCode.focus();
+  message(authMessage, 'Code envoyé : saisis les 6 chiffres reçus. Pense aussi à vérifier tes spams.');
 });
+verifyAuthCode.addEventListener('click', async () => {
+  const token = authCode.value.replace(/\s/g, '');
+  if (!email.value.trim() || !/^\d{6}$/.test(token)) return message(authMessage, 'Entre les 6 chiffres reçus par e-mail.', true);
+  verifyAuthCode.disabled = true; verifyAuthCode.textContent = '…';
+  const { error } = await supabase.auth.verifyOtp({ email: email.value.trim(), token, type: 'email' });
+  verifyAuthCode.disabled = false; verifyAuthCode.textContent = 'Me connecter';
+  if (error) return message(authMessage, 'Code invalide ou expiré. Demande-en un nouveau.', true);
+  message(authMessage, 'Connexion réussie.');
+});
+authCode.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); verifyAuthCode.click(); } });
 $('#sign-out').addEventListener('click', () => supabase.auth.signOut());
 copyCalendarLink.addEventListener('click', async () => {
   await navigator.clipboard.writeText(calendarLink.value);
