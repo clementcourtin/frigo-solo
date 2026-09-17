@@ -93,8 +93,8 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
 .shopping-card { order: 5; margin-top: 16px; padding: 22px; border: 1px solid #ebe7dd; border-radius: 22px; background: #fffdf8; box-shadow: 0 8px 30px #413b2c08; }
-.shopping-form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 9px; margin-top: 14px; }
-.shopping-form button { padding: 0 15px; }
+.shopping-form { display: grid; grid-template-columns: 1fr 48px; align-items: end; gap: 9px; margin-top: 14px; }
+.shopping-form button { min-height: 48px; padding: 0; font-size: 1.35rem; line-height: 1; }
 .shopping-items { margin-top: 13px; }
 .shopping-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #ece8de; }
 .shopping-item:last-child { border-bottom: 0; }
