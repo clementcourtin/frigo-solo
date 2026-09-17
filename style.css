@@ -38,8 +38,10 @@ button:hover { background: #285321; }
 .scan-control-button:hover, .scan-control-button.active { background: #151714; }
 .zoom-control { display: flex; flex: 1 1 190px; grid-template-columns: auto 1fr; align-items: center; gap: 9px; min-height: 36px; padding: 0 10px; border-radius: 9px; background: #ece8df; color: #625e55; font-size: .8rem; }
 .zoom-control input { min-height: auto; padding: 0; accent-color: #386a2e; }
-.photo-scan-button { display: inline-flex; width: max-content; min-height: 36px; align-items: center; margin-top: 10px; padding: 0 12px; border: 1px solid #dedbd1; border-radius: 9px; background: #fff; color: #625e55; cursor: pointer; font-size: .8rem; font-weight: 750; }
-.photo-scan-button:hover { background: #f2eee6; }
+.photo-scan-button { display: inline-flex; width: 100%; min-height: 44px; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; border: 1px dashed #b9b4a8; border-radius: 11px; background: #f5f1e8; color: #625e55; font-size: .84rem; }
+.photo-scan-button span { color: #386a2e; font-size: 1.15rem; }
+.photo-scan-button:hover { background: #ece6da; color: #3b5d34; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .food-list { margin-top: 40px; }
 .list-heading { display: flex; justify-content: space-between; align-items: center; }
 .priority-section { margin: 16px 0; padding: 15px 16px; border: 1px solid #f0d7ad; border-radius: 15px; background: #fff6e6; }
