@@ -1,6 +1,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const supabase = createClient('https://xxvxmefrrkuurlnxyxsn.supabase.co', 'sb_publishable_sb_FFicGYl7AZS8wxL8GvA_ev8j0Btp');
+const appUrl = `${window.location.origin}${window.location.pathname}`;
 // Le suffixe .ics aide notamment Calendrier sur iPhone à identifier le flux.
 const calendarEndpoint = 'https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar/frigo-solo.ics';
 const $ = (s) => document.querySelector(s);
@@ -12,7 +13,7 @@ const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar =
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
 const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch'), zoomControl = $('#zoom-control'), zoomInput = $('#scan-zoom'), barcodePhoto = $('#barcode-photo'), scanPhotoButton = $('#scan-photo');
-const foods = $('#foods'), empty = $('#empty-state'), clearAll = $('#clear-all'), template = $('#food-template');
+const foods = $('#foods'), empty = $('#empty-state'), clearAll = $('#clear-all'), template = $('#food-template'), foodCount = $('#food-count');
 const prioritySection = $('#priority-section'), prioritySummary = $('#priority-summary');
 const shoppingCard = $('#shopping-card'), shoppingForm = $('#shopping-form'), shoppingName = $('#shopping-name');
 const shoppingItems = $('#shopping-items'), shoppingEmpty = $('#shopping-empty'), clearBought = $('#clear-bought'), shoppingTemplate = $('#shopping-template');
@@ -40,6 +41,7 @@ function render() {
   if (priority.length) prioritySummary.textContent = priority.map((item) => `${item.name} (${status(daysUntil(item.date))[1].toLowerCase()})`).join(' · ');
   const visible = activeLocation === 'all' ? ordered : ordered.filter((item) => (item.location || 'Frigo') === activeLocation);
   foods.innerHTML = '';
+  foodCount.textContent = entries.length ? `${entries.length} article${entries.length > 1 ? 's' : ''}` : '';
   empty.hidden = Boolean(visible.length);
   empty.textContent = entries.length ? `Aucun aliment dans « ${activeLocation} ». Choisis un autre filtre.` : 'Ton frigo est vide par ici. Ajoute ton premier aliment.';
   clearAll.hidden = !entries.length;
@@ -52,7 +54,7 @@ function render() {
     node.querySelector('.quantity-plus').addEventListener('click', () => changeQuantity(item, 1));
     node.querySelector('.shop-button').addEventListener('click', () => addToShopping(item.name));
     node.querySelector('.consume-button').addEventListener('click', () => consumeFood(item.id));
-    node.querySelector('.delete-button').addEventListener('click', () => removeFood(item.id)); foods.append(node);
+    foods.append(node);
   }
 }
 async function loadFoods() {
@@ -194,7 +196,7 @@ async function deleteShopping(id) {
 }
 
 authForm.addEventListener('submit', async (event) => {
-  event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: window.location.href } });
+  event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: appUrl } });
   message(authMessage, error ? 'Impossible d’envoyer le lien. Réessaie.' : 'Lien envoyé : ouvre ton e-mail puis reviens ici.', Boolean(error));
 });
 $('#sign-out').addEventListener('click', () => supabase.auth.signOut());
