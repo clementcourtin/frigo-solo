@@ -50,9 +50,8 @@
             </div>
             <p id="scan-message" class="hint" aria-live="polite">Cadre le code à plat, dans un endroit bien éclairé.</p>
             <div id="scanner" hidden></div>
-            <label class="photo-scan-button">Lire depuis une photo
-              <input id="barcode-photo" type="file" accept="image/*" capture="environment" hidden />
-            </label>
+            <button id="scan-photo" class="photo-scan-button" type="button"><span aria-hidden="true">▧</span> Lire un code depuis une photo</button>
+            <input id="barcode-photo" class="visually-hidden" type="file" accept="image/*" capture="environment" />
           </div>
           <div class="barcode-row">
             <label>Code-barres <span class="optional">facultatif</span>
