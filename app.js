@@ -12,7 +12,7 @@ const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), 
 const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
-const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch'), zoomControl = $('#zoom-control'), zoomInput = $('#scan-zoom'), barcodePhoto = $('#barcode-photo'), scanPhotoButton = $('#scan-photo');
+const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch');
 const foods = $('#foods'), empty = $('#empty-state'), clearAll = $('#clear-all'), template = $('#food-template'), foodCount = $('#food-count');
 const prioritySection = $('#priority-section'), prioritySummary = $('#priority-summary');
 const shoppingCard = $('#shopping-card'), shoppingForm = $('#shopping-form'), shoppingName = $('#shopping-name');
@@ -29,13 +29,13 @@ function message(target, text, error = false) { target.textContent = text; targe
 function daysUntil(date) { const t = new Date(`${date}T12:00:00`), n = new Date(); n.setHours(12, 0, 0, 0); return Math.round((t - n) / 86400000); }
 function status(days) {
   if (days < 0) return ['expired', `Périmé depuis ${Math.abs(days)} jour${days === -1 ? '' : 's'}`];
-  if (days === 0) return ['today', 'À consommer aujourd’hui'];
-  if (days === 1) return ['soon', 'À consommer demain'];
-  return days <= 3 ? ['soon', `À consommer dans ${days} jours`] : ['later', `À consommer dans ${days} jours`];
+  if (days === 0) return ['today', 'À consommer d’ici ce soir'];
+  if (days === 1) return ['soon', 'À consommer d’ici demain'];
+  return days <= 3 ? ['soon', `À consommer d’ici ${days} jours`] : ['later', `À consommer d’ici ${days} jours`];
 }
-function quantityLabel(item) { const q = Number(item.quantity || 1), u = item.unit || 'unité'; return `${q} ${u}${u === 'unité' && q > 1 ? 's' : ''} · ${item.location || 'Frigo'}`; }
+function quantityLabel(item) { const q = Number(item.quantity || 1), u = item.unit === 'unité' ? 'paquet' : (item.unit || 'paquet'); return `${q} ${u}${u === 'paquet' && q > 1 ? 's' : ''} · ${item.location || 'Frigo'}`; }
 function quantityStep(item) { return ['g', 'ml'].includes(item.unit) ? 100 : ['kg', 'L'].includes(item.unit) ? 0.1 : 1; }
-function quantityText(item) { const quantity = Number(item.quantity || 1); return `${Number.isInteger(quantity) ? quantity : quantity.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} ${item.unit || 'unité'}`; }
+function quantityText(item) { const quantity = Number(item.quantity || 1), unit = item.unit === 'unité' ? 'paquet' : (item.unit || 'paquet'); return `${Number.isInteger(quantity) ? quantity : quantity.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} ${unit}`; }
 function updateAddButton() { addFoodButton.textContent = `Ajouter au ${locationInput.value.toLowerCase()}`; }
 
 function render() {
@@ -110,19 +110,12 @@ async function lookupProduct(code) {
   } catch { message(scanMessage, 'Impossible de contacter la base produits. Tu peux ajouter le nom à la main.', true); }
   finally { lookupButton.disabled = false; lookupButton.textContent = 'Chercher'; }
 }
-function resetScanControls() { torchOn = false; scanControls.hidden = true; torchButton.hidden = true; torchButton.classList.remove('active'); torchButton.textContent = '🔦 Lampe'; zoomControl.hidden = true; }
+function resetScanControls() { torchOn = false; scanControls.hidden = true; torchButton.hidden = true; torchButton.classList.remove('active'); torchButton.textContent = '🔦 Lampe'; }
 function setupCameraControls() {
   resetScanControls();
   if (!scanner) return;
   const capabilities = scanner.getRunningTrackCameraCapabilities?.() || scanner.getRunningTrackCapabilities?.() || {};
-  const settings = scanner.getRunningTrackSettings?.() || {};
   if (capabilities.torch) { scanControls.hidden = false; torchButton.hidden = false; }
-  if (capabilities.zoom) {
-    const { min = 1, max = 1, step = 0.1 } = capabilities.zoom;
-    zoomInput.min = min; zoomInput.max = max; zoomInput.step = step;
-    zoomInput.value = Math.min(max, Math.max(min, settings.zoom || min));
-    scanControls.hidden = false; zoomControl.hidden = false;
-  }
 }
 async function disposeScanner() {
   const currentScanner = scanner;
@@ -135,13 +128,13 @@ async function disposeScanner() {
 async function stopScanner() {
   resetScanControls();
   await disposeScanner();
-  scannerElement.hidden = true; scanButton.textContent = 'Scanner un code-barres';
+  scannerElement.hidden = true; scanButton.textContent = 'Scanner un code-barre';
 }
 function scannerFailureMessage(error) {
   const name = String(error?.name || error || '');
   if (/NotAllowed|Permission|denied/i.test(name)) return 'Le navigateur bloque la caméra. Vérifie que « Appareil photo » est autorisé pour Frigo Solo, puis réessaie.';
   if (/NotReadable|TrackStart|in use/i.test(name)) return 'La caméra est déjà utilisée par une autre app. Ferme-la, puis réessaie.';
-  if (/NotFound|Overconstrained/i.test(name)) return 'Aucune caméra compatible n’a été trouvée. Essaie la caméra avant ou une photo.';
+  if (/NotFound|Overconstrained/i.test(name)) return 'Aucune caméra compatible n’a été trouvée. Essaie avec une autre caméra.';
   return 'Le lecteur n’a pas réussi à démarrer. Réessaie : il basculera automatiquement sur une autre caméra.';
 }
 function createScanner() {
@@ -149,8 +142,8 @@ function createScanner() {
 }
 async function startScanner() {
   if (isScanning) return stopScanner();
-  if (!window.Html5Qrcode) return message(scanMessage, 'Le lecteur de code-barres n’a pas pu se charger. Utilise le champ ci-dessous.', true);
-  if (!navigator.mediaDevices?.getUserMedia) return message(scanMessage, 'Ton navigateur ne permet pas d’ouvrir la caméra. Essaie « Lire depuis une photo ».', true);
+  if (!window.Html5Qrcode) return message(scanMessage, 'Le lecteur de code-barre n’a pas pu se charger. Utilise le champ ci-dessous.', true);
+  if (!navigator.mediaDevices?.getUserMedia) return message(scanMessage, 'Ton navigateur ne permet pas d’ouvrir la caméra. Utilise le champ ci-dessous.', true);
   scannerElement.hidden = false; scanButton.textContent = 'Arrêter le scan'; message(scanMessage, 'Ouverture de la caméra…'); lastScannedCode = '';
   await disposeScanner();
   const scanConfig = { fps: 10, qrbox: { width: 280, height: 150 }, aspectRatio: 1.777, disableFlip: true };
@@ -187,26 +180,6 @@ async function toggleTorch() {
   if (!scanner || !isScanning) return;
   try { torchOn = !torchOn; await scanner.applyVideoConstraints({ advanced: [{ torch: torchOn }] }); torchButton.classList.toggle('active', torchOn); torchButton.textContent = torchOn ? '🔦 Lampe allumée' : '🔦 Lampe'; }
   catch { torchOn = false; message(scanMessage, 'La lampe n’est pas disponible avec cet appareil.', true); }
-}
-async function setZoom() {
-  if (!scanner || !isScanning) return;
-  try { await scanner.applyVideoConstraints({ advanced: [{ zoom: Number(zoomInput.value) }] }); }
-  catch { message(scanMessage, 'Le zoom n’est pas disponible avec cet appareil.', true); }
-}
-async function scanPhoto() {
-  const file = barcodePhoto.files?.[0]; if (!file) return;
-  if (!window.Html5Qrcode) return message(scanMessage, 'Le lecteur de code-barres n’a pas pu se charger.', true);
-  try {
-    if (isScanning) await stopScanner();
-    await disposeScanner();
-    scannerElement.hidden = false; message(scanMessage, 'Lecture de la photo…');
-    scanner = createScanner();
-    const code = await scanner.scanFile(file, true); barcodeInput.value = code; message(scanMessage, 'Code trouvé dans la photo. Recherche du produit…'); await lookupProduct(code);
-  } catch { message(scanMessage, 'Code introuvable sur cette photo. Essaie une image plus nette et mieux éclairée.', true); }
-  finally {
-    barcodePhoto.value = '';
-    if (scanner && !isScanning) { await disposeScanner(); scannerElement.hidden = true; }
-  }
 }
 async function removeFood(id) { const { error } = await supabase.from('food_items').delete().eq('id', id); if (error) return message(authMessage, 'Impossible de supprimer cet aliment.', true); loadFoods(); }
 async function consumeFood(id) {
@@ -279,7 +252,7 @@ filterButtons.forEach((button) => button.addEventListener('click', () => {
 }));
 lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
-scanButton.addEventListener('click', startScanner); scanPhotoButton.addEventListener('click', () => barcodePhoto.click()); torchButton.addEventListener('click', toggleTorch); zoomInput.addEventListener('input', setZoom); barcodePhoto.addEventListener('change', scanPhoto); dateInput.min = new Date().toISOString().slice(0, 10);
+scanButton.addEventListener('click', startScanner); torchButton.addEventListener('click', toggleTorch); dateInput.min = new Date().toISOString().slice(0, 10);
 locationInput.addEventListener('change', updateAddButton); showCalendar.addEventListener('click', () => { calendarSetup.hidden = !calendarSetup.hidden; if (!calendarSetup.hidden) calendarSetup.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); hideCalendar.addEventListener('click', () => { calendarSetup.hidden = true; }); updateAddButton();
 addTrigger.addEventListener('click', () => { foodDialog.showModal(); requestAnimationFrame(() => nameInput.focus()); });
 closeAdd.addEventListener('click', async () => { await stopScanner(); foodDialog.close(); });
