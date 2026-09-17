@@ -92,7 +92,7 @@ async function setCalendarLink() {
   calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
 async function setSession(session) {
-  const user = session?.user, connected = Boolean(user); addTrigger.hidden = !connected; authCard.hidden = connected; authCodeRow.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
+  const user = session?.user, connected = Boolean(user); addTrigger.hidden = !connected; authCard.hidden = connected; if (connected) authCodeRow.hidden = true; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
   if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
   else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; if (foodDialog.open) foodDialog.close(); render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
