@@ -10,7 +10,7 @@
     <title>Frigo Solo</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260917-mobileactions" />
+    <link rel="stylesheet" href="style.css?v=20260917-pwaauth" />
   </head>
   <body>
     <main class="shell">
@@ -32,13 +32,19 @@
 
       <section id="auth-card" class="auth-card" aria-labelledby="auth-title">
         <h2 id="auth-title">Synchroniser ton frigo</h2>
-        <p id="auth-description">Entre ton e-mail : tu recevras un lien de connexion, sans mot de passe à retenir.</p>
+        <p id="auth-description">Entre ton e-mail : tu recevras un code de connexion, sans mot de passe à retenir.</p>
         <form id="auth-form" class="auth-form">
           <label>E-mail
             <input id="email" type="email" autocomplete="email" placeholder="toi@exemple.com" required />
           </label>
-          <button type="submit">M’envoyer le lien</button>
+          <button type="submit">M’envoyer un code</button>
         </form>
+        <div id="auth-code-row" class="auth-code-row" hidden>
+          <label>Code reçu par e-mail
+            <input id="auth-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" aria-label="Code de connexion à six chiffres" />
+          </label>
+          <button id="verify-auth-code" type="button">Me connecter</button>
+        </div>
         <p id="auth-message" class="hint" aria-live="polite"></p>
       </section>
 
@@ -169,6 +175,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260917-simplifiedscan"></script>
+    <script type="module" src="app.js?v=20260917-pwaauth"></script>
   </body>
 </html>
