@@ -112,9 +112,12 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
   .food-item { grid-template-columns: 12px minmax(0, 1fr); align-items: start; padding: 16px; }
   .food-copy { min-width: 0; }
   .food-copy strong { overflow-wrap: anywhere; }
-  .item-actions { grid-column: 2; display: grid; width: 100%; grid-template-columns: 1fr; align-items: stretch; gap: 10px; }
-  .quantity-control { width: 100%; grid-template-columns: 40px 1fr 40px; }
-  .food-buttons { display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .item-actions { grid-column: 2; display: grid; width: 100%; grid-template-columns: 40px 40px minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; gap: 8px; }
+  .quantity-control { display: contents; }
+  .quantity-control span { display: none; }
+  .quantity-button { min-height: 44px; border-radius: 10px; }
+  .food-buttons { grid-column: 3 / -1; display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .food-buttons button { min-width: 0; padding: 0 8px; }
   .consume-button { min-width: 0; }
   .account-bar { align-items: flex-start; flex-direction: column; margin-top: -20px; }
 }
