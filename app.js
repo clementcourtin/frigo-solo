@@ -10,7 +10,7 @@ const authMessage = $('#auth-message'), nameInput = $('#food-name'), dateInput =
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
-const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch'), zoomControl = $('#zoom-control'), zoomInput = $('#scan-zoom'), barcodePhoto = $('#barcode-photo');
+const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch'), zoomControl = $('#zoom-control'), zoomInput = $('#scan-zoom'), barcodePhoto = $('#barcode-photo'), scanPhotoButton = $('#scan-photo');
 const foods = $('#foods'), empty = $('#empty-state'), clearAll = $('#clear-all'), template = $('#food-template');
 const prioritySection = $('#priority-section'), prioritySummary = $('#priority-summary');
 const shoppingCard = $('#shopping-card'), shoppingForm = $('#shopping-form'), shoppingName = $('#shopping-name');
@@ -150,10 +150,15 @@ async function scanPhoto() {
   if (!window.Html5Qrcode) return message(scanMessage, 'Le lecteur de code-barres n’a pas pu se charger.', true);
   try {
     if (isScanning) await stopScanner();
-    scannerElement.hidden = false; message(scanMessage, 'Lecture de la photo…'); scanner = scanner || new Html5Qrcode('scanner');
-    const code = await scanner.scanFile(file, true); barcodeInput.value = code; message(scanMessage, 'Code trouvé dans la photo.'); lookupProduct(code);
+    if (scanner) { try { scanner.clear(); } catch {} scanner = undefined; }
+    scannerElement.hidden = false; message(scanMessage, 'Lecture de la photo…');
+    scanner = new Html5Qrcode('scanner', { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPC_E], useBarCodeDetectorIfSupported: true });
+    const code = await scanner.scanFile(file, true); barcodeInput.value = code; message(scanMessage, 'Code trouvé dans la photo. Recherche du produit…'); await lookupProduct(code);
   } catch { message(scanMessage, 'Code introuvable sur cette photo. Essaie une image plus nette et mieux éclairée.', true); }
-  finally { barcodePhoto.value = ''; }
+  finally {
+    barcodePhoto.value = '';
+    if (scanner && !isScanning) { try { scanner.clear(); } catch {} scanner = undefined; scannerElement.hidden = true; }
+  }
 }
 async function removeFood(id) { const { error } = await supabase.from('food_items').delete().eq('id', id); if (error) return message(authMessage, 'Impossible de supprimer cet aliment.', true); loadFoods(); }
 async function consumeFood(id) {
@@ -225,5 +230,5 @@ filterButtons.forEach((button) => button.addEventListener('click', () => {
 }));
 lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
-scanButton.addEventListener('click', startScanner); torchButton.addEventListener('click', toggleTorch); zoomInput.addEventListener('input', setZoom); barcodePhoto.addEventListener('change', scanPhoto); dateInput.min = new Date().toISOString().slice(0, 10);
+scanButton.addEventListener('click', startScanner); scanPhotoButton.addEventListener('click', () => barcodePhoto.click()); torchButton.addEventListener('click', toggleTorch); zoomInput.addEventListener('input', setZoom); barcodePhoto.addEventListener('change', scanPhoto); dateInput.min = new Date().toISOString().slice(0, 10);
 const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
