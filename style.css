@@ -56,9 +56,26 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .food-copy span { color: #716d63; font-size: .87rem; }
 .food-copy .food-meta { color: #386a2e; font-size: .8rem; font-weight: 750; }
 .item-actions { display: flex; align-items: center; gap: 7px; }
+.quantity-control { display: grid; grid-template-columns: 30px auto 30px; align-items: center; overflow: hidden; min-height: 34px; border: 1px solid #dedbd1; border-radius: 9px; background: #fff; }
+.quantity-control span { min-width: 46px; padding: 0 5px; color: #625e55; text-align: center; font-size: .76rem; font-weight: 750; white-space: nowrap; }
+.quantity-button { min-height: 32px; border-radius: 0; background: #f3f0e8; color: #4b473d; font-size: 1.05rem; }
+.quantity-button:hover { background: #e7e1d6; }
+.food-buttons { display: flex; align-items: center; gap: 7px; }
 .consume-button { min-height: 34px; padding: 0 10px; border-radius: 9px; background: #e6efdf; color: #315d2c; font-size: .78rem; }
 .consume-button:hover { background: #d8e7ce; }
+.shop-button { min-height: 34px; padding: 0 10px; border-radius: 9px; background: #fff1d8; color: #91580f; font-size: .78rem; }
+.shop-button:hover { background: #fae4bd; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
+.shopping-card { margin-top: 28px; padding: 22px; border-radius: 22px; background: #fffdf8; box-shadow: 0 8px 30px #413b2c0d; }
+.shopping-form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 9px; margin-top: 14px; }
+.shopping-form button { padding: 0 15px; }
+.shopping-items { margin-top: 13px; }
+.shopping-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #ece8de; }
+.shopping-item:last-child { border-bottom: 0; }
+.shopping-item label { display: flex; grid-template-columns: none; align-items: center; gap: 10px; font-size: .94rem; font-weight: 650; }
+.shopping-item input { width: 20px; min-height: 20px; accent-color: #386a2e; }
+.shopping-item.done .shopping-label { color: #928d82; text-decoration: line-through; }
+.shopping-delete { flex: 0 0 auto; }
 .app-footer { padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
-@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } .food-item { align-items: start; } .item-actions { flex-direction: column; } .consume-button { min-width: 76px; } }
+@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row, .shopping-form { grid-template-columns: 1fr; } .lookup-button { width: 100%; } .food-item { align-items: start; } .item-actions { flex-direction: column; align-items: stretch; } .food-buttons { justify-content: flex-end; } .consume-button { min-width: 76px; } }
