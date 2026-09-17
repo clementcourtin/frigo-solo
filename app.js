@@ -11,7 +11,9 @@ const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), 
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
 const foods = $('#foods'), empty = $('#empty-state'), clearAll = $('#clear-all'), template = $('#food-template');
-let entries = [], scanner, isScanning = false;
+const prioritySection = $('#priority-section'), prioritySummary = $('#priority-summary');
+const filterButtons = [...document.querySelectorAll('.filter-button')];
+let entries = [], activeLocation = 'all', scanner, isScanning = false;
 
 function message(target, text, error = false) { target.textContent = text; target.style.color = error ? '#9a3d31' : ''; }
 function daysUntil(date) { const t = new Date(`${date}T12:00:00`), n = new Date(); n.setHours(12, 0, 0, 0); return Math.round((t - n) / 86400000); }
@@ -24,12 +26,20 @@ function status(days) {
 function quantityLabel(item) { const q = Number(item.quantity || 1), u = item.unit || 'unité'; return `${q} ${u}${u === 'unité' && q > 1 ? 's' : ''} · ${item.location || 'Frigo'}`; }
 
 function render() {
-  entries.sort((a, b) => a.date.localeCompare(b.date)); foods.innerHTML = '';
-  empty.hidden = Boolean(entries.length); clearAll.hidden = !entries.length;
-  for (const item of entries) {
+  const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const priority = ordered.filter((item) => daysUntil(item.date) <= 3).slice(0, 3);
+  prioritySection.hidden = !priority.length;
+  if (priority.length) prioritySummary.textContent = priority.map((item) => `${item.name} (${status(daysUntil(item.date))[1].toLowerCase()})`).join(' · ');
+  const visible = activeLocation === 'all' ? ordered : ordered.filter((item) => (item.location || 'Frigo') === activeLocation);
+  foods.innerHTML = '';
+  empty.hidden = Boolean(visible.length);
+  empty.textContent = entries.length ? `Aucun aliment dans « ${activeLocation} ». Choisis un autre filtre.` : 'Ton frigo est vide par ici. Ajoute ton premier aliment.';
+  clearAll.hidden = !entries.length;
+  for (const item of visible) {
     const node = template.content.cloneNode(true), row = node.querySelector('li'), [kind, label] = status(daysUntil(item.date));
     row.classList.add(kind); node.querySelector('strong').textContent = item.name;
     node.querySelector('.food-meta').textContent = quantityLabel(item); node.querySelector('.food-date').textContent = label;
+    node.querySelector('.consume-button').addEventListener('click', () => consumeFood(item.id));
     node.querySelector('.delete-button').addEventListener('click', () => removeFood(item.id)); foods.append(node);
   }
 }
@@ -74,6 +84,12 @@ async function startScanner() {
   } catch { await stopScanner(); message(scanMessage, 'La caméra est inaccessible. Autorise-la dans le navigateur, ou saisis le code à la main.', true); }
 }
 async function removeFood(id) { const { error } = await supabase.from('food_items').delete().eq('id', id); if (error) return message(authMessage, 'Impossible de supprimer cet aliment.', true); loadFoods(); }
+async function consumeFood(id) {
+  const { error } = await supabase.from('food_items').delete().eq('id', id);
+  if (error) return message(authMessage, 'Impossible de marquer cet aliment comme consommé.', true);
+  message(authMessage, 'Bon appétit ! Aliment retiré du frigo.');
+  loadFoods();
+}
 
 authForm.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: window.location.href } });
@@ -95,6 +111,11 @@ clearAll.addEventListener('click', async () => {
   const { error } = await supabase.from('food_items').delete().in('id', entries.map((item) => item.id));
   if (error) return message(authMessage, 'Impossible de vider le frigo.', true); loadFoods();
 });
+filterButtons.forEach((button) => button.addEventListener('click', () => {
+  activeLocation = button.dataset.location;
+  filterButtons.forEach((item) => { const selected = item === button; item.classList.toggle('active', selected); item.setAttribute('aria-pressed', String(selected)); });
+  render();
+}));
 lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
 scanButton.addEventListener('click', startScanner); dateInput.min = new Date().toISOString().slice(0, 10);
