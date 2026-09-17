@@ -2,8 +2,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient('https://xxvxmefrrkuurlnxyxsn.supabase.co', 'sb_publishable_sb_FFicGYl7AZS8wxL8GvA_ev8j0Btp');
 const appUrl = `${window.location.origin}${window.location.pathname}`;
-// Le suffixe .ics aide notamment Calendrier sur iPhone à identifier le flux.
-const calendarEndpoint = 'https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar/frigo-solo.ics';
+// Un vrai chemin .ics (sans paramètre dans l’URL) est mieux accepté par Calendrier sur iPhone.
+const calendarEndpoint = 'https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar';
 const $ = (s) => document.querySelector(s);
 const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email');
 const foodCard = $('#food-card'), signedInEmail = $('#signed-in-email');
@@ -89,7 +89,7 @@ async function setCalendarLink() {
   if (readError) return message(authMessage, 'Impossible de préparer ton calendrier.', true);
   const { data: feed, error: createError } = existing ? { data: existing, error: null } : await supabase.from('calendar_feeds').insert({}).select('token').single();
   if (createError || !feed) return message(authMessage, 'Impossible de préparer ton calendrier.', true);
-  calendarLink.value = `${calendarEndpoint}?token=${feed.token}`;
+  calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
 async function setSession(session) {
   const user = session?.user, connected = Boolean(user); foodCard.hidden = !connected; authCard.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
