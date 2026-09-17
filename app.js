@@ -89,7 +89,7 @@ async function setSession(session) {
   const user = session?.user, connected = Boolean(user); foodCard.hidden = !connected; authCard.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
   if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
-  else { entries = []; shoppingEntries = []; render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
+  else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
 
 async function lookupProduct(code) {
@@ -234,5 +234,5 @@ filterButtons.forEach((button) => button.addEventListener('click', () => {
 lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
 scanButton.addEventListener('click', startScanner); scanPhotoButton.addEventListener('click', () => barcodePhoto.click()); torchButton.addEventListener('click', toggleTorch); zoomInput.addEventListener('input', setZoom); barcodePhoto.addEventListener('change', scanPhoto); dateInput.min = new Date().toISOString().slice(0, 10);
-locationInput.addEventListener('change', updateAddButton); showCalendar.addEventListener('click', () => { calendarSetup.hidden = !calendarSetup.hidden; }); hideCalendar.addEventListener('click', () => { calendarSetup.hidden = true; }); updateAddButton();
+locationInput.addEventListener('change', updateAddButton); showCalendar.addEventListener('click', () => { calendarSetup.hidden = !calendarSetup.hidden; if (!calendarSetup.hidden) calendarSetup.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); hideCalendar.addEventListener('click', () => { calendarSetup.hidden = true; }); updateAddButton();
 const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
