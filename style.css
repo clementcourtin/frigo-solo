@@ -7,7 +7,7 @@ header { order: 1; }
 h1 { margin: 0; font-size: clamp(2rem, 8vw, 3.35rem); line-height: 1.02; letter-spacing: -.055em; }
 .intro { margin: 18px 0 35px; color: #67645b; font-size: 1.05rem; }
 h2 { margin: 0; font-size: 1.05rem; }
-.add-card { order: 4; margin-top: 28px; padding: 22px; border-radius: 22px; background: #fffdf8; box-shadow: 0 8px 30px #413b2c0d; }
+.add-card { order: 4; margin-top: 28px; padding: 22px; border: 1px solid #dbe9d1; border-radius: 22px; background: #f0f6eb; box-shadow: 0 8px 30px #413b2c0a; }
 .auth-card { order: 2; margin-bottom: 18px; padding: 22px; border-radius: 22px; background: #e7f1e0; }
 .auth-card > p { margin: 9px 0 0; color: #596653; line-height: 1.4; }
 .auth-form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 10px; margin-top: 17px; }
@@ -33,6 +33,7 @@ button:hover { background: #285321; }
 .quantity-inputs { display: grid; grid-template-columns: minmax(0, 1fr) 82px; gap: 7px; }
 .quantity-inputs select { padding: 0 8px; }
 .hint { margin: 8px 0 0; color: #7a7569; font-size: .82rem; line-height: 1.35; }
+.section-kicker { margin: 0 0 5px; color: #838074; letter-spacing: .11em; font-size: .68rem; font-weight: 850; }
 #scanner { overflow: hidden; margin-top: 13px; border-radius: 13px; background: #20241e; }
 #scanner video { display: block; width: 100%; }
 .scan-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 10px; }
@@ -47,6 +48,8 @@ button:hover { background: #285321; }
 .food-list { order: 3; margin-top: 24px; }
 .list-heading { display: flex; justify-content: space-between; align-items: center; }
 .food-list #list-title { font-size: clamp(1.55rem, 6vw, 2.05rem); letter-spacing: -.04em; }
+.food-list #food-count { display: inline-block; margin-left: 5px; color: #8a867c; font-size: .82rem; font-weight: 700; letter-spacing: 0; vertical-align: middle; }
+.dashboard-heading { padding-bottom: 2px; }
 .priority-section { margin: 16px 0; padding: 15px 16px; border: 1px solid #f0d7ad; border-radius: 15px; background: #fff6e6; }
 .priority-heading { display: flex; align-items: center; gap: 8px; color: #985d12; }
 .priority-heading span { font-size: 1.1rem; }
@@ -60,26 +63,26 @@ button:hover { background: #285321; }
 .text-button:hover { background: none; color: #27251f; }
 .empty { color: #7a7569; line-height: 1.5; }
 ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
-.food-item { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 13px; padding: 16px; border-radius: 15px; background: #fffdf8; }
+.food-item { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 13px; padding: 17px; border: 1px solid #ebe7dd; border-radius: 17px; background: #fffdf8; box-shadow: 0 4px 14px #413b2c08; }
 .status-dot { width: 11px; height: 11px; border-radius: 50%; background: #77a358; }
 .food-item.soon .status-dot { background: #e69d35; }
 .food-item.today .status-dot, .food-item.expired .status-dot { background: #cf4d3d; }
 .food-copy { display: grid; gap: 3px; }
 .food-copy span { color: #716d63; font-size: .87rem; }
 .food-copy .food-meta { color: #386a2e; font-size: .8rem; font-weight: 750; }
-.item-actions { display: flex; align-items: center; gap: 7px; }
+.item-actions { display: flex; align-items: center; gap: 9px; }
 .quantity-control { display: grid; grid-template-columns: 30px auto 30px; align-items: center; overflow: hidden; min-height: 34px; border: 1px solid #dedbd1; border-radius: 9px; background: #fff; }
 .quantity-control span { min-width: 46px; padding: 0 5px; color: #625e55; text-align: center; font-size: .76rem; font-weight: 750; white-space: nowrap; }
 .quantity-button { min-height: 32px; border-radius: 0; background: #f3f0e8; color: #4b473d; font-size: 1.05rem; }
 .quantity-button:hover { background: #e7e1d6; }
 .food-buttons { display: flex; align-items: center; gap: 7px; }
-.consume-button { min-height: 34px; padding: 0 10px; border-radius: 9px; background: #e6efdf; color: #315d2c; font-size: .78rem; }
-.consume-button:hover { background: #d8e7ce; }
-.shop-button { min-height: 34px; padding: 0 10px; border-radius: 9px; background: #fff1d8; color: #91580f; font-size: .78rem; }
-.shop-button:hover { background: #fae4bd; }
+.consume-button { min-height: 36px; padding: 0 12px; border-radius: 10px; background: #386a2e; color: #fff; font-size: .78rem; }
+.consume-button:hover { background: #285321; }
+.shop-button { min-height: 36px; padding: 0 11px; border: 1px solid #ecd6ad; border-radius: 10px; background: #fffaf0; color: #91580f; font-size: .78rem; }
+.shop-button:hover { background: #fff1d8; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
-.shopping-card { order: 5; margin-top: 28px; padding: 22px; border-radius: 22px; background: #fffdf8; box-shadow: 0 8px 30px #413b2c0d; }
+.shopping-card { order: 5; margin-top: 30px; padding: 22px; border: 1px solid #ebe7dd; border-radius: 22px; background: #fffdf8; box-shadow: 0 8px 30px #413b2c08; }
 .shopping-form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 9px; margin-top: 14px; }
 .shopping-form button { padding: 0 15px; }
 .shopping-items { margin-top: 13px; }
@@ -94,4 +97,4 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .account-bar > div { display: flex; gap: 13px; }
 .account-bar .text-button { color: #486443; font-size: .76rem; }
 .app-footer { padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
-@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row, .shopping-form { grid-template-columns: 1fr; } .lookup-button { width: 100%; } .food-item { align-items: start; } .item-actions { flex-direction: column; align-items: stretch; } .food-buttons { justify-content: flex-end; } .consume-button { min-width: 76px; } .account-bar { align-items: flex-start; flex-direction: column; margin-top: -20px; } }
+@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row, .shopping-form { grid-template-columns: 1fr; } .lookup-button { width: 100%; } .food-item { align-items: start; } .item-actions { flex-direction: column; align-items: stretch; } .food-buttons { justify-content: flex-end; } .consume-button { min-width: 86px; } .account-bar { align-items: flex-start; flex-direction: column; margin-top: -20px; } }
