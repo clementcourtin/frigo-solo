@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f6f4ed" />
     <title>Frigo Solo</title>
-    <link rel="stylesheet" href="style.css?v=20260917-account" />
+    <link rel="stylesheet" href="style.css?v=20260917-addmodal" />
   </head>
   <body>
     <main class="shell">
       <header>
-        <p class="eyebrow">FRIGO SOLO</p>
+        <div class="brand-lockup" aria-label="Frigo Solo">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <p class="brand-name">FRIGO <span>SOLO</span></p>
+        </div>
         <h1>Qu’est-ce qu’on mange<br />avant que ça périme ?</h1>
         <p class="intro">Garde simplement un œil sur ce que tu as chez toi.</p>
         <div id="account-bar" class="account-bar" hidden>
@@ -34,9 +37,12 @@
         <p id="auth-message" class="hint" aria-live="polite"></p>
       </section>
 
-      <section id="food-card" class="add-card" aria-labelledby="add-title" hidden>
-        <p class="section-kicker">NOUVEL ARTICLE</p>
-        <h2 id="add-title">Ajouter à ton stock</h2>
+      <dialog id="food-dialog" class="food-dialog" aria-labelledby="add-title">
+        <section id="food-card" class="add-card">
+          <div class="dialog-heading">
+            <div><p class="section-kicker">NOUVEL ARTICLE</p><h2 id="add-title">Ajouter à ton stock</h2></div>
+            <button id="close-add" class="dialog-close" type="button" aria-label="Fermer">×</button>
+          </div>
         <form id="food-form">
           <div class="scan-area">
             <button id="start-scan" class="secondary-button" type="button">Scanner un code-barres</button>
@@ -84,7 +90,8 @@
           </label>
           <button type="submit">Ajouter au frigo</button>
         </form>
-      </section>
+        </section>
+      </dialog>
 
       <section id="food-list" class="food-list" aria-labelledby="list-title">
         <div class="list-heading dashboard-heading">
@@ -92,7 +99,10 @@
             <p class="section-kicker">TON FRIGO</p>
             <h2 id="list-title">À surveiller <span id="food-count"></span></h2>
           </div>
-          <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
+          <div class="stock-actions">
+            <button id="open-add" class="add-trigger" type="button" hidden><span aria-hidden="true">＋</span> Ajouter un article</button>
+            <button id="clear-all" class="text-button" type="button" hidden>Tout effacer</button>
+          </div>
         </div>
         <section id="priority-section" class="priority-section" aria-labelledby="priority-title" hidden>
           <div class="priority-heading">
@@ -158,6 +168,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260917-cloudflarecalendar"></script>
+    <script type="module" src="app.js?v=20260917-addmodal"></script>
   </body>
 </html>
