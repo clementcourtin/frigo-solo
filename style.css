@@ -11,6 +11,10 @@ h2 { margin: 0; font-size: 1.05rem; }
 .auth-card > p { margin: 9px 0 0; color: #596653; line-height: 1.4; }
 .auth-form { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 10px; margin-top: 17px; }
 .auth-form button { padding: 0 16px; }
+.calendar-setup { margin: 16px 0; padding: 14px; border-radius: 13px; background: #fffdf8; }
+.calendar-setup > p { margin: 6px 0 10px; }
+.calendar-link-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.calendar-link-row input { min-width: 0; font-size: .78rem; }
 form { display: grid; gap: 15px; margin-top: 18px; }
 label { display: grid; gap: 7px; font-size: .87rem; font-weight: 700; }
 .optional { color: #857f73; font-weight: 500; }
@@ -44,4 +48,4 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .food-copy .food-meta { color: #386a2e; font-size: .8rem; font-weight: 750; }
 .delete-button { width: 34px; min-height: 34px; padding: 0; border-radius: 50%; background: #eeeae0; color: #777268; font-size: 1.45rem; line-height: 1; }
 .delete-button:hover { background: #e3ded3; color: #342f27; }
-@media (max-width: 480px) { .barcode-row, .details-row, .auth-form { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }
+@media (max-width: 480px) { .barcode-row, .details-row, .auth-form, .calendar-link-row { grid-template-columns: 1fr; } .lookup-button { width: 100%; } }
