@@ -33,6 +33,13 @@ button:hover { background: #285321; }
 .hint { margin: 8px 0 0; color: #7a7569; font-size: .82rem; line-height: 1.35; }
 #scanner { overflow: hidden; margin-top: 13px; border-radius: 13px; background: #20241e; }
 #scanner video { display: block; width: 100%; }
+.scan-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 10px; }
+.scan-control-button { min-height: 36px; padding: 0 12px; background: #2e312c; font-size: .8rem; }
+.scan-control-button:hover, .scan-control-button.active { background: #151714; }
+.zoom-control { display: flex; flex: 1 1 190px; grid-template-columns: auto 1fr; align-items: center; gap: 9px; min-height: 36px; padding: 0 10px; border-radius: 9px; background: #ece8df; color: #625e55; font-size: .8rem; }
+.zoom-control input { min-height: auto; padding: 0; accent-color: #386a2e; }
+.photo-scan-button { display: inline-flex; width: max-content; min-height: 36px; align-items: center; margin-top: 10px; padding: 0 12px; border: 1px solid #dedbd1; border-radius: 9px; background: #fff; color: #625e55; cursor: pointer; font-size: .8rem; font-weight: 750; }
+.photo-scan-button:hover { background: #f2eee6; }
 .food-list { margin-top: 40px; }
 .list-heading { display: flex; justify-content: space-between; align-items: center; }
 .priority-section { margin: 16px 0; padding: 15px 16px; border: 1px solid #f0d7ad; border-radius: 15px; background: #fff6e6; }
