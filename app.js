@@ -216,11 +216,11 @@ authForm.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.auth.signInWithOtp({ email: email.value.trim(), options: { emailRedirectTo: appUrl } });
   if (error) return message(authMessage, 'Impossible d’envoyer le code. Réessaie.', true);
   authCodeRow.hidden = false; authCode.value = ''; authCode.focus();
-  message(authMessage, 'Code envoyé : saisis les 6 chiffres reçus. Pense aussi à vérifier tes spams.');
+  message(authMessage, 'Code envoyé : saisis les 8 chiffres reçus. Pense aussi à vérifier tes spams.');
 });
 verifyAuthCode.addEventListener('click', async () => {
   const token = authCode.value.replace(/\s/g, '');
-  if (!email.value.trim() || !/^\d{6}$/.test(token)) return message(authMessage, 'Entre les 6 chiffres reçus par e-mail.', true);
+  if (!email.value.trim() || !/^\d{8}$/.test(token)) return message(authMessage, 'Entre les 8 chiffres reçus par e-mail.', true);
   verifyAuthCode.disabled = true; verifyAuthCode.textContent = '…';
   const { error } = await supabase.auth.verifyOtp({ email: email.value.trim(), token, type: 'email' });
   verifyAuthCode.disabled = false; verifyAuthCode.textContent = 'Me connecter';
