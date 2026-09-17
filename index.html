@@ -44,8 +44,15 @@
         <form id="food-form">
           <div class="scan-area">
             <button id="start-scan" class="secondary-button" type="button">Scanner un code-barres</button>
-            <p id="scan-message" class="hint" aria-live="polite">Le scan préremplit le nom du produit.</p>
+            <div id="scan-controls" class="scan-controls" hidden>
+              <button id="toggle-torch" class="scan-control-button" type="button" hidden>🔦 Lampe</button>
+              <label id="zoom-control" class="zoom-control" hidden>Zoom <input id="scan-zoom" type="range" min="1" max="1" step="0.1" value="1" /></label>
+            </div>
+            <p id="scan-message" class="hint" aria-live="polite">Cadre le code à plat, dans un endroit bien éclairé.</p>
             <div id="scanner" hidden></div>
+            <label class="photo-scan-button">Lire depuis une photo
+              <input id="barcode-photo" type="file" accept="image/*" capture="environment" hidden />
+            </label>
           </div>
           <div class="barcode-row">
             <label>Code-barres <span class="optional">facultatif</span>
