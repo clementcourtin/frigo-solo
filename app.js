@@ -6,7 +6,7 @@ const appUrl = `${window.location.origin}${window.location.pathname}`;
 const calendarEndpoint = 'https://frigo-solo-calendar.clementhealeaucrt.workers.dev';
 const $ = (s) => document.querySelector(s);
 const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email');
-const foodCard = $('#food-card'), signedInEmail = $('#signed-in-email');
+const foodDialog = $('#food-dialog'), addTrigger = $('#open-add'), closeAdd = $('#close-add'), signedInEmail = $('#signed-in-email');
 const authMessage = $('#auth-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
 const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
@@ -92,10 +92,10 @@ async function setCalendarLink() {
   calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
 async function setSession(session) {
-  const user = session?.user, connected = Boolean(user); foodCard.hidden = !connected; authCard.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
+  const user = session?.user, connected = Boolean(user); addTrigger.hidden = !connected; authCard.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
   if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
-  else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
+  else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; if (foodDialog.open) foodDialog.close(); render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
 
 async function lookupProduct(code) {
@@ -252,7 +252,7 @@ copyCalendarLink.addEventListener('click', async () => {
 form.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.from('food_items').insert({ name: nameInput.value.trim(), expires_on: dateInput.value, barcode: barcodeInput.value || null, location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value });
   if (error) return message(authMessage, 'Impossible d’ajouter cet aliment. Réessaie.', true);
-  form.reset(); quantityInput.value = 1; await loadFoods(); nameInput.focus();
+  form.reset(); quantityInput.value = 1; await loadFoods(); await stopScanner(); if (foodDialog.open) foodDialog.close(); message(authMessage, 'Article ajouté à ton stock.');
   updateAddButton();
 });
 clearAll.addEventListener('click', async () => {
@@ -281,4 +281,7 @@ lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
 scanButton.addEventListener('click', startScanner); scanPhotoButton.addEventListener('click', () => barcodePhoto.click()); torchButton.addEventListener('click', toggleTorch); zoomInput.addEventListener('input', setZoom); barcodePhoto.addEventListener('change', scanPhoto); dateInput.min = new Date().toISOString().slice(0, 10);
 locationInput.addEventListener('change', updateAddButton); showCalendar.addEventListener('click', () => { calendarSetup.hidden = !calendarSetup.hidden; if (!calendarSetup.hidden) calendarSetup.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); hideCalendar.addEventListener('click', () => { calendarSetup.hidden = true; }); updateAddButton();
+addTrigger.addEventListener('click', () => { foodDialog.showModal(); requestAnimationFrame(() => nameInput.focus()); });
+closeAdd.addEventListener('click', async () => { await stopScanner(); foodDialog.close(); });
+foodDialog.addEventListener('click', async (event) => { if (event.target === foodDialog) { await stopScanner(); foodDialog.close(); } });
 const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
