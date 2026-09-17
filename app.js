@@ -5,9 +5,10 @@ const supabase = createClient('https://xxvxmefrrkuurlnxyxsn.supabase.co', 'sb_pu
 const calendarEndpoint = 'https://xxvxmefrrkuurlnxyxsn.supabase.co/functions/v1/calendar/frigo-solo.ics';
 const $ = (s) => document.querySelector(s);
 const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email');
-const foodCard = $('#food-card'), signedIn = $('#signed-in'), signedInEmail = $('#signed-in-email');
+const foodCard = $('#food-card'), signedInEmail = $('#signed-in-email');
 const authMessage = $('#auth-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
+const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
 const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch'), zoomControl = $('#zoom-control'), zoomInput = $('#scan-zoom'), barcodePhoto = $('#barcode-photo'), scanPhotoButton = $('#scan-photo');
@@ -16,6 +17,7 @@ const prioritySection = $('#priority-section'), prioritySummary = $('#priority-s
 const shoppingCard = $('#shopping-card'), shoppingForm = $('#shopping-form'), shoppingName = $('#shopping-name');
 const shoppingItems = $('#shopping-items'), shoppingEmpty = $('#shopping-empty'), clearBought = $('#clear-bought'), shoppingTemplate = $('#shopping-template');
 const filterButtons = [...document.querySelectorAll('.filter-button')];
+const addFoodButton = form.querySelector('button[type="submit"]');
 let entries = [], shoppingEntries = [], activeLocation = 'all', scanner, isScanning = false, torchOn = false, lastScannedCode = '';
 
 function message(target, text, error = false) { target.textContent = text; target.style.color = error ? '#9a3d31' : ''; }
@@ -29,6 +31,7 @@ function status(days) {
 function quantityLabel(item) { const q = Number(item.quantity || 1), u = item.unit || 'unité'; return `${q} ${u}${u === 'unité' && q > 1 ? 's' : ''} · ${item.location || 'Frigo'}`; }
 function quantityStep(item) { return ['g', 'ml'].includes(item.unit) ? 100 : ['kg', 'L'].includes(item.unit) ? 0.1 : 1; }
 function quantityText(item) { const quantity = Number(item.quantity || 1); return `${Number.isInteger(quantity) ? quantity : quantity.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} ${item.unit || 'unité'}`; }
+function updateAddButton() { addFoodButton.textContent = `Ajouter au ${locationInput.value.toLowerCase()}`; }
 
 function render() {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
@@ -81,12 +84,11 @@ async function setCalendarLink() {
   const { data: feed, error: createError } = existing ? { data: existing, error: null } : await supabase.from('calendar_feeds').insert({}).select('token').single();
   if (createError || !feed) return message(authMessage, 'Impossible de préparer ton calendrier.', true);
   calendarLink.value = `${calendarEndpoint}?token=${feed.token}`;
-  calendarSetup.hidden = false;
 }
 async function setSession(session) {
-  const user = session?.user, connected = Boolean(user); foodCard.hidden = !connected; authForm.hidden = connected; signedIn.hidden = !connected;
+  const user = session?.user, connected = Boolean(user); foodCard.hidden = !connected; authCard.hidden = connected; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
-  if (connected) { signedInEmail.textContent = `Connecté avec ${user.email}`; message(authMessage, 'Ton frigo est synchronisé.'); await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
+  if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
   else { entries = []; shoppingEntries = []; render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
 
@@ -205,6 +207,7 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault(); const { error } = await supabase.from('food_items').insert({ name: nameInput.value.trim(), expires_on: dateInput.value, barcode: barcodeInput.value || null, location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value });
   if (error) return message(authMessage, 'Impossible d’ajouter cet aliment. Réessaie.', true);
   form.reset(); quantityInput.value = 1; await loadFoods(); nameInput.focus();
+  updateAddButton();
 });
 clearAll.addEventListener('click', async () => {
   if (!confirm('Supprimer tous les aliments ?')) return;
@@ -231,4 +234,5 @@ filterButtons.forEach((button) => button.addEventListener('click', () => {
 lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
 scanButton.addEventListener('click', startScanner); scanPhotoButton.addEventListener('click', () => barcodePhoto.click()); torchButton.addEventListener('click', toggleTorch); zoomInput.addEventListener('input', setZoom); barcodePhoto.addEventListener('change', scanPhoto); dateInput.min = new Date().toISOString().slice(0, 10);
+locationInput.addEventListener('change', updateAddButton); showCalendar.addEventListener('click', () => { calendarSetup.hidden = !calendarSetup.hidden; }); hideCalendar.addEventListener('click', () => { calendarSetup.hidden = true; }); updateAddButton();
 const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
