@@ -7,7 +7,7 @@ const calendarEndpoint = 'https://frigo-solo-calendar.clementhealeaucrt.workers.
 const $ = (s) => document.querySelector(s);
 const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email'), authCodeRow = $('#auth-code-row'), authCode = $('#auth-code'), verifyAuthCode = $('#verify-auth-code');
 const foodDialog = $('#food-dialog'), addTrigger = $('#open-add'), closeAdd = $('#close-add'), signedInEmail = $('#signed-in-email');
-const authMessage = $('#auth-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
+const authMessage = $('#auth-message'), foodMessage = $('#food-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
 const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
@@ -241,8 +241,17 @@ copyCalendarLink.addEventListener('click', async () => {
   setTimeout(() => { copyCalendarLink.textContent = 'Copier'; }, 1800);
 });
 form.addEventListener('submit', async (event) => {
-  event.preventDefault(); const { error } = await supabase.from('food_items').insert({ name: nameInput.value.trim(), expires_on: dateInput.value, barcode: barcodeInput.value || null, location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value });
-  if (error) return message(authMessage, 'Impossible d’ajouter cet aliment. Réessaie.', true);
+  event.preventDefault();
+  if (!form.reportValidity()) return;
+  addFoodButton.disabled = true; addFoodButton.textContent = 'Ajout…';
+  let error;
+  try {
+    ({ error } = await supabase.from('food_items').insert({ name: nameInput.value.trim(), expires_on: dateInput.value, barcode: barcodeInput.value || null, location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value }));
+  } catch {
+    error = true;
+  }
+  addFoodButton.disabled = false; updateAddButton();
+  if (error) return message(foodMessage, 'Impossible d’ajouter cet aliment. Réessaie.', true);
   form.reset(); quantityInput.value = 1; await loadFoods(); await stopScanner(); if (foodDialog.open) foodDialog.close(); message(authMessage, 'Article ajouté à ton stock.');
   updateAddButton();
 });
@@ -272,7 +281,7 @@ lookupButton.addEventListener('click', () => lookupProduct(barcodeInput.value));
 barcodeInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); lookupProduct(barcodeInput.value); } });
 scanButton.addEventListener('click', startScanner); torchButton.addEventListener('click', toggleTorch); dateInput.min = new Date().toISOString().slice(0, 10);
 locationInput.addEventListener('change', updateAddButton); showCalendar.addEventListener('click', () => { calendarSetup.hidden = !calendarSetup.hidden; if (!calendarSetup.hidden) calendarSetup.scrollIntoView({ behavior: 'smooth', block: 'start' }); }); hideCalendar.addEventListener('click', () => { calendarSetup.hidden = true; }); updateAddButton();
-addTrigger.addEventListener('click', () => { foodDialog.showModal(); requestAnimationFrame(() => nameInput.focus()); });
+addTrigger.addEventListener('click', () => { message(foodMessage, ''); foodDialog.showModal(); requestAnimationFrame(() => nameInput.focus()); });
 closeAdd.addEventListener('click', async () => { await stopScanner(); foodDialog.close(); });
 foodDialog.addEventListener('click', async (event) => { if (event.target === foodDialog) { await stopScanner(); foodDialog.close(); } });
 const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
