@@ -10,6 +10,7 @@ const foodDialog = $('#food-dialog'), addTrigger = $('#open-add'), closeAdd = $(
 const authMessage = $('#auth-message'), foodMessage = $('#food-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
 const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
+const deleteAccountButton = $('#delete-account'), privacyDialog = $('#privacy-dialog'), showPrivacy = $('#show-privacy'), closePrivacy = $('#close-privacy');
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
 const scanControls = $('#scan-controls'), torchButton = $('#toggle-torch');
@@ -235,6 +236,25 @@ verifyAuthCode.addEventListener('click', async () => {
 });
 authCode.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); verifyAuthCode.click(); } });
 $('#sign-out').addEventListener('click', () => supabase.auth.signOut());
+deleteAccountButton.addEventListener('click', async () => {
+  const approved = confirm('Supprimer définitivement ton compte, ton stock, ta liste de courses et ton calendrier ? Cette action est irréversible.');
+  if (!approved) return;
+  deleteAccountButton.disabled = true;
+  deleteAccountButton.textContent = 'Suppression…';
+  const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+  if (error) {
+    deleteAccountButton.disabled = false;
+    deleteAccountButton.textContent = 'Supprimer mon compte';
+    return alert('Impossible de supprimer ton compte pour le moment. Réessaie dans un instant.');
+  }
+  await supabase.auth.signOut();
+  deleteAccountButton.disabled = false;
+  deleteAccountButton.textContent = 'Supprimer mon compte';
+  alert('Ton compte et tes données ont bien été supprimés.');
+});
+showPrivacy.addEventListener('click', () => privacyDialog.showModal());
+closePrivacy.addEventListener('click', () => privacyDialog.close());
+privacyDialog.addEventListener('click', (event) => { if (event.target === privacyDialog) privacyDialog.close(); });
 copyCalendarLink.addEventListener('click', async () => {
   await navigator.clipboard.writeText(calendarLink.value);
   copyCalendarLink.textContent = 'Copié !';

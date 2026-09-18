@@ -10,7 +10,7 @@
     <title>Frigo Solo</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260918-formlayout" />
+    <link rel="stylesheet" href="style.css?v=20260918-privacy" />
   </head>
   <body>
     <main class="shell">
@@ -26,6 +26,7 @@
           <div>
             <button id="show-calendar" class="text-button" type="button">Ajouter à mon calendrier</button>
             <button id="sign-out" class="text-button" type="button">Se déconnecter</button>
+            <button id="delete-account" class="text-button danger-button" type="button">Supprimer mon compte</button>
           </div>
         </div>
       </header>
@@ -151,7 +152,35 @@
         </div>
       </section>
     </main>
-    <footer class="app-footer">© 2026 Clément Courtin · Frigo Solo</footer>
+    <footer class="app-footer">
+      <span>© 2026 Clément Courtin · Frigo Solo</span>
+      <span aria-hidden="true">·</span>
+      <button id="show-privacy" class="text-button" type="button">Politique de confidentialité</button>
+    </footer>
+
+    <dialog id="privacy-dialog" class="privacy-dialog" aria-labelledby="privacy-title">
+      <article class="privacy-card">
+        <div class="dialog-heading">
+          <div><p class="section-kicker">TES DONNÉES</p><h2 id="privacy-title">Politique de confidentialité</h2></div>
+          <button id="close-privacy" class="dialog-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <p>Dernière mise à jour : 18 septembre 2026.</p>
+        <h3>Qui est responsable ?</h3>
+        <p>Frigo Solo est éditée par Clément Courtin. Pour toute question sur tes données, tu peux <a href="https://github.com/clementcourtin/frigo-solo/issues/new" target="_blank" rel="noreferrer">ouvrir une demande via le dépôt GitHub</a>.</p>
+        <h3>Les données utilisées</h3>
+        <p>L’application traite ton adresse e-mail pour la connexion, ainsi que les aliments, dates, quantités, emplacements, codes-barres, liste de courses et le lien personnel de ton calendrier que tu choisis d’enregistrer.</p>
+        <h3>Pourquoi ?</h3>
+        <p>Uniquement pour te connecter, synchroniser ton frigo entre tes appareils et générer tes rappels de péremption. Il n’y a ni publicité, ni revente de données, ni suivi publicitaire.</p>
+        <h3>Où sont-elles traitées ?</h3>
+        <p>Frigo Solo utilise Supabase pour l’authentification et le stockage, Resend pour les e-mails de connexion, Cloudflare pour le lien calendrier et GitHub Pages pour l’hébergement. Ces prestataires peuvent traiter des données hors de l’Espace économique européen selon leurs propres garanties et politiques de confidentialité.</p>
+        <h3>Durée de conservation</h3>
+        <p>Les données restent associées à ton compte tant qu’il existe. Tu peux supprimer définitivement ton compte et son contenu à tout moment depuis l’application. Des sauvegardes techniques peuvent subsister temporairement selon les politiques des prestataires.</p>
+        <h3>Tes droits</h3>
+        <p>Tu peux demander l’accès, la rectification, l’effacement, la limitation ou la portabilité de tes données, ou t’opposer à leur traitement. Contacte l’éditeur via le lien ci-dessus. Tu peux aussi saisir la CNIL si tu estimes que tes droits ne sont pas respectés.</p>
+        <h3>Sécurité</h3>
+        <p>Chaque compte ne peut accéder qu’à ses propres données. Ton lien calendrier est personnel : garde-le privé, car toute personne qui le possède peut consulter les rappels associés.</p>
+      </article>
+    </dialog>
     <template id="food-template">
       <li class="food-item">
         <div class="status-dot" aria-hidden="true"></div>
@@ -176,6 +205,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260918-addfix"></script>
+    <script type="module" src="app.js?v=20260918-privacy"></script>
   </body>
 </html>

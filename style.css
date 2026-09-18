@@ -104,7 +104,16 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .account-bar[hidden] { display: none; }
 .account-bar > div { display: flex; gap: 13px; }
 .account-bar .text-button { color: #486443; font-size: .76rem; }
-.app-footer { padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
+.danger-button { color: #9a3d31 !important; }
+.app-footer { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 6px; padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
+.app-footer .text-button { color: #777268; font-size: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.privacy-dialog { width: min(calc(100% - 28px), 650px); max-height: min(82dvh, 760px); padding: 0; border: 0; border-radius: 24px; background: transparent; }
+.privacy-dialog::backdrop { background: #1c2a1ecc; backdrop-filter: blur(4px); }
+.privacy-card { max-height: min(82dvh, 760px); overflow: auto; padding: 23px; border: 1px solid #dbe9d1; border-radius: 24px; background: #fffdf8; box-shadow: 0 18px 60px #0b170d66; }
+.privacy-card > p { margin: 10px 0 18px; color: #6f6a60; line-height: 1.5; }
+.privacy-card h3 { margin: 20px 0 6px; color: #315d2c; font-size: .92rem; }
+.privacy-card h3 + p { margin: 0; color: #59564d; font-size: .91rem; line-height: 1.52; }
+.privacy-card a { color: #315d2c; font-weight: 750; }
 @media (max-width: 480px) {
   .barcode-row, .auth-form, .auth-code-row, .calendar-link-row { grid-template-columns: 1fr; }
   .barcode-row { grid-template-columns: minmax(0, 1fr) 112px; }
@@ -135,4 +144,7 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
   .food-buttons button { min-width: 0; padding: 0 8px; }
   .consume-button { min-width: 0; }
   .account-bar { align-items: flex-start; flex-direction: column; margin-top: -20px; }
+  .account-bar > div { flex-wrap: wrap; gap: 8px 13px; }
+  .privacy-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
+  .privacy-card { max-height: calc(100dvh - 20px); padding: 19px; }
 }
