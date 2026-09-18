@@ -49,9 +49,9 @@ function render() {
   empty.hidden = Boolean(visible.length);
   const emptyMessages = {
     all: 'Ton stock est vide par ici. Ajoute ton premier aliment.',
-    Frigo: 'Le frigo est vide. Une petite course ?',
+    Frigo: 'Pas de bouffe dans le frigo. Une petite course ?',
     Congélateur: 'Rien de nouveau au congélo. Il garde son calme.',
-    Placard: 'C’est vide ici. Pas de monstre dans le placard.'
+    Placard: "Y'a rien. Même pas de monstre dans le placard."
   };
   empty.textContent = visible.length ? '' : emptyMessages[activeLocation];
   clearAll.hidden = !entries.length;
