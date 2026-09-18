@@ -31,7 +31,7 @@ h2 { margin: 0; font-size: 1.05rem; }
 form { display: grid; gap: 15px; margin-top: 18px; }
 label { display: grid; gap: 7px; font-size: .87rem; font-weight: 700; }
 .optional { color: #857f73; font-weight: 500; }
-input, select { width: 100%; min-height: 48px; border: 1px solid #dedbd1; border-radius: 11px; padding: 0 13px; background: #fff; color: inherit; font: inherit; }
+input, select { width: 100%; min-width: 0; min-height: 48px; border: 1px solid #dedbd1; border-radius: 11px; padding: 0 13px; background: #fff; color: inherit; font: inherit; }
 input:focus { outline: 3px solid #d8ebc9; border-color: #77a358; }
 button { min-height: 48px; border: 0; border-radius: 11px; background: #386a2e; color: white; font: inherit; font-weight: 800; cursor: pointer; }
 button:hover { background: #285321; }
@@ -107,12 +107,19 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .app-footer { padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
 @media (max-width: 480px) {
   .barcode-row, .details-row, .auth-form, .auth-code-row, .calendar-link-row { grid-template-columns: 1fr; }
+  .barcode-row { grid-template-columns: minmax(0, 1fr) 112px; }
+  .barcode-row .lookup-button { width: auto; padding: 0 12px; }
   .shopping-form { grid-template-columns: 1fr 44px; gap: 8px; }
   .shopping-form input, .shopping-form button { min-height: 44px; }
   .shopping-form button { font-size: 1.15rem; font-weight: 500; }
   .lookup-button { width: 100%; }
-  .food-dialog { width: calc(100% - 20px); max-height: 94dvh; }
-  .add-card { padding: 19px; }
+  .food-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 16px); overflow: visible; }
+  .add-card { padding: 18px; overflow-x: hidden; }
+  #food-form { gap: 10px; margin-top: 12px; }
+  .food-dialog input, .food-dialog select { min-height: 44px; }
+  .food-dialog #food-form > button[type="submit"] { min-height: 46px; }
+  .scan-area .hint { margin-top: 6px; }
+  input[type="date"] { max-width: 100%; }
   .food-item { grid-template-columns: 12px minmax(0, 1fr); align-items: start; padding: 16px; }
   .food-copy { min-width: 0; }
   .food-copy strong { overflow-wrap: anywhere; }
