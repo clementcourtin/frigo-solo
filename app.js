@@ -47,7 +47,13 @@ function render() {
   foods.innerHTML = '';
   foodCount.textContent = entries.length ? `${entries.length} article${entries.length > 1 ? 's' : ''}` : '';
   empty.hidden = Boolean(visible.length);
-  empty.textContent = entries.length ? `Aucun aliment dans « ${activeLocation} ». Choisis un autre filtre.` : 'Ton frigo est vide par ici. Ajoute ton premier aliment.';
+  const emptyMessages = {
+    all: 'Ton stock est vide par ici. Ajoute ton premier aliment.',
+    Frigo: 'Le frigo est vide. Une petite course ?',
+    Congélateur: 'Rien de nouveau au congélo. Il garde son calme.',
+    Placard: 'C’est vide ici. Pas de monstre dans le placard.'
+  };
+  empty.textContent = visible.length ? '' : emptyMessages[activeLocation];
   clearAll.hidden = !entries.length;
   for (const item of visible) {
     const node = template.content.cloneNode(true), row = node.querySelector('li'), [kind, label] = status(daysUntil(item.date));
