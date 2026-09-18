@@ -106,9 +106,11 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .account-bar .text-button { color: #486443; font-size: .76rem; }
 .app-footer { padding: 0 22px 30px; color: #908b80; text-align: center; font-size: .78rem; }
 @media (max-width: 480px) {
-  .barcode-row, .details-row, .auth-form, .auth-code-row, .calendar-link-row { grid-template-columns: 1fr; }
+  .barcode-row, .auth-form, .auth-code-row, .calendar-link-row { grid-template-columns: 1fr; }
   .barcode-row { grid-template-columns: minmax(0, 1fr) 112px; }
   .barcode-row .lookup-button { width: auto; padding: 0 12px; }
+  .details-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .details-row label { min-width: 0; }
   .shopping-form { grid-template-columns: 1fr 44px; gap: 8px; }
   .shopping-form input, .shopping-form button { min-height: 44px; }
   .shopping-form button { font-size: 1.15rem; font-weight: 500; }
@@ -119,7 +121,9 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
   .food-dialog input, .food-dialog select { min-height: 44px; }
   .food-dialog #food-form > button[type="submit"] { min-height: 46px; }
   .scan-area .hint { margin-top: 6px; }
-  input[type="date"] { max-width: 100%; }
+  .food-dialog label { min-width: 0; }
+  input[type="date"] { width: 100% !important; min-width: 0 !important; max-width: 100% !important; }
+  input[type="date"]::-webkit-date-and-time-value { min-width: 0; text-align: left; }
   .food-item { grid-template-columns: 12px minmax(0, 1fr); align-items: start; padding: 16px; }
   .food-copy { min-width: 0; }
   .food-copy strong { overflow-wrap: anywhere; }
