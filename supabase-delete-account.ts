@@ -1,5 +1,3 @@
-// Supabase Edge Function: delete-account
-// Deploy this file as the "delete-account" Edge Function in the Supabase dashboard.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
@@ -27,7 +25,6 @@ Deno.serve(async (request) => {
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!supabaseUrl || !anonKey || !serviceRoleKey) return response({ error: 'Server configuration error' }, 500);
 
-  // Validate the caller's token before using the service role.
   const caller = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authorization } },
   });
