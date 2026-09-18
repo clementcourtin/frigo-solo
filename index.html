@@ -84,7 +84,7 @@
               <div class="quantity-inputs">
                 <input id="food-quantity" name="quantity" type="number" min="0.01" step="0.01" value="1" required />
                 <select id="food-unit" name="unit" aria-label="Paquet">
-                  <option value="paquet">paquet</option>
+                  <option value="unité">paquet</option>
                   <option value="g">g</option>
                   <option value="kg">kg</option>
                   <option value="ml">ml</option>
@@ -98,6 +98,7 @@
           </label>
           <button type="submit">Ajouter au frigo</button>
         </form>
+        <p id="food-message" class="hint" aria-live="polite"></p>
         </section>
       </dialog>
 
@@ -175,6 +176,6 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260918-emptycopy"></script>
+    <script type="module" src="app.js?v=20260918-addfix"></script>
   </body>
 </html>
