@@ -1,8 +1,8 @@
-const CACHE_NAME = 'frigo-solo-v8';
+const CACHE_NAME = 'frigo-solo-v9';
 const APP_SHELL = [
   './',
   './index.html',
-  './style.css?v=20260921-native-date',
+  './style.css?v=20260921-clean-date',
   './app.js?v=20260921-addform',
   './manifest.webmanifest',
   './frigo-solo-icon-512.png',
