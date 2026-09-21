@@ -288,7 +288,7 @@ deleteAccountButton.addEventListener('click', async () => {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
     deleteAccountButton.disabled = false;
-    deleteAccountButton.textContent = 'Supprimer mon compte';
+    deleteAccountButton.textContent = 'Suppression';
     return alert('Ta session a expiré. Reconnecte-toi puis réessaie.');
   }
   const { error } = await supabase.functions.invoke('delete-account', {
@@ -297,12 +297,12 @@ deleteAccountButton.addEventListener('click', async () => {
   });
   if (error) {
     deleteAccountButton.disabled = false;
-    deleteAccountButton.textContent = 'Supprimer mon compte';
+    deleteAccountButton.textContent = 'Suppression';
     return alert('Impossible de supprimer ton compte pour le moment. Réessaie dans un instant.');
   }
   await supabase.auth.signOut();
   deleteAccountButton.disabled = false;
-  deleteAccountButton.textContent = 'Supprimer mon compte';
+  deleteAccountButton.textContent = 'Suppression';
   alert('Ton compte et tes données ont bien été supprimés.');
 });
 showPrivacy.addEventListener('click', () => privacyDialog.showModal());
