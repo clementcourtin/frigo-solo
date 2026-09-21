@@ -241,7 +241,16 @@ deleteAccountButton.addEventListener('click', async () => {
   if (!approved) return;
   deleteAccountButton.disabled = true;
   deleteAccountButton.textContent = 'Suppression…';
-  const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    deleteAccountButton.disabled = false;
+    deleteAccountButton.textContent = 'Supprimer mon compte';
+    return alert('Ta session a expiré. Reconnecte-toi puis réessaie.');
+  }
+  const { error } = await supabase.functions.invoke('delete-account', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + session.access_token },
+  });
   if (error) {
     deleteAccountButton.disabled = false;
     deleteAccountButton.textContent = 'Supprimer mon compte';
