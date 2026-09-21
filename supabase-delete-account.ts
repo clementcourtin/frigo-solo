@@ -31,14 +31,16 @@ Deno.serve(async (request) => {
   if (!authorization?.startsWith('Bearer ')) return response(request, { error: 'Unauthorized' }, 401);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (!supabaseUrl || !anonKey || !serviceRoleKey) {
+  const publishableKeys = JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') ?? '{}');
+  const secretKeys = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') ?? '{}');
+  const publishableKey = publishableKeys.default ?? Deno.env.get('SUPABASE_ANON_KEY');
+  const secretKey = secretKeys.default ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!supabaseUrl || !publishableKey || !secretKey) {
     console.error('Missing Supabase function environment variables');
     return response(request, { error: 'Server configuration error' }, 500);
   }
 
-  const caller = createClient(supabaseUrl, anonKey, {
+  const caller = createClient(supabaseUrl, publishableKey, {
     global: { headers: { Authorization: authorization } },
   });
   const { data: { user }, error: userError } = await caller.auth.getUser();
@@ -47,7 +49,7 @@ Deno.serve(async (request) => {
     return response(request, { error: 'Unauthorized' }, 401);
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey);
+  const admin = createClient(supabaseUrl, secretKey);
   for (const table of ['food_items', 'shopping_items', 'calendar_feeds']) {
     const { error } = await admin.from(table).delete().eq('user_id', user.id);
     if (error) {
