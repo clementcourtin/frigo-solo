@@ -24,9 +24,9 @@
         <div id="account-bar" class="account-bar" hidden>
           <span id="signed-in-email"></span>
           <div>
-            <button id="show-calendar" class="text-button" type="button">Ajouter à mon calendrier</button>
-            <button id="sign-out" class="text-button" type="button">Se déconnecter</button>
-            <button id="delete-account" class="text-button danger-button" type="button">Supprimer mon compte</button>
+            <button id="show-calendar" class="text-button" type="button">Calendrier</button>
+            <button id="sign-out" class="text-button" type="button">Déconnexion</button>
+            <button id="delete-account" class="text-button danger-button" type="button">Suppression</button>
           </div>
         </div>
       </header>
@@ -206,5 +206,10 @@
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script type="module" src="app.js?v=20260918-privacy"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+      }
+    </script>
   </body>
 </html>
