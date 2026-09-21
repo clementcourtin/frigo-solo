@@ -10,7 +10,7 @@
     <title>Frigo Solo</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="stylesheet" href="style.css?v=20260918-privacy" />
+    <link rel="stylesheet" href="style.css?v=20260921-addform" />
   </head>
   <body>
     <main class="shell">
@@ -82,16 +82,16 @@
               </select>
             </label>
             <label>Quantité
-              <div class="quantity-inputs">
-                <input id="food-quantity" name="quantity" type="number" min="0.01" step="0.01" value="1" required />
-                <select id="food-unit" name="unit" aria-label="Paquet">
-                  <option value="unité">paquet</option>
-                  <option value="g">g</option>
-                  <option value="kg">kg</option>
-                  <option value="ml">ml</option>
-                  <option value="L">L</option>
-                </select>
-              </div>
+              <input id="food-quantity" name="quantity" type="number" min="0.01" step="0.01" value="1" required />
+            </label>
+            <label>Unité
+              <select id="food-unit" name="unit">
+                <option value="unité">paquet</option>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+                <option value="ml">ml</option>
+                <option value="L">L</option>
+              </select>
             </label>
           </div>
           <label>À consommer d’ici le
@@ -205,7 +205,7 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260921-accountfix"></script>
+    <script type="module" src="app.js?v=20260921-addform"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
