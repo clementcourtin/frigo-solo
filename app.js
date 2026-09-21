@@ -20,7 +20,7 @@ const shoppingCard = $('#shopping-card'), shoppingForm = $('#shopping-form'), sh
 const shoppingItems = $('#shopping-items'), shoppingEmpty = $('#shopping-empty'), clearBought = $('#clear-bought'), shoppingTemplate = $('#shopping-template');
 const filterButtons = [...document.querySelectorAll('.filter-button')];
 const addFoodButton = form.querySelector('button[type="submit"]');
-let entries = [], shoppingEntries = [], activeLocation = 'all', scanner, isScanning = false, torchOn = false, lastScannedCode = '';
+let entries = [], shoppingEntries = [], activeLocation = 'all', scanner, isScanning = false, torchOn = false, lastScannedCode = '', activeUserId = '';
 function barcodeFormats() {
   const formats = window.Html5QrcodeSupportedFormats;
   return [formats.EAN_13, formats.EAN_8, formats.UPC_A, formats.UPC_E];
@@ -99,12 +99,36 @@ async function setCalendarLink() {
   calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
 async function setSession(session) {
-  const user = session?.user, connected = Boolean(user); addTrigger.hidden = !connected; authCard.hidden = connected; if (connected) authCodeRow.hidden = true; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
+  const user = session?.user, connected = Boolean(user); activeUserId = user?.id || ''; addTrigger.hidden = !connected; authCard.hidden = connected; if (connected) authCodeRow.hidden = true; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
   if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
   else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; if (foodDialog.open) foodDialog.close(); render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
 
+function openDateChoice() {
+  dateInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  dateInput.focus({ preventScroll: true });
+  try { dateInput.showPicker?.(); } catch {}
+}
+function preferenceStore() {
+  try { return JSON.parse(localStorage.getItem('frigo-solo-preferences-' + activeUserId) || '{}'); } catch { return {}; }
+}
+function applyPreference(barcode) {
+  if (!activeUserId || !barcode) return false;
+  const preference = preferenceStore()[barcode];
+  if (!preference) return false;
+  locationInput.value = preference.location || locationInput.value;
+  quantityInput.value = preference.quantity || quantityInput.value;
+  unitInput.value = preference.unit || unitInput.value;
+  updateAddButton();
+  return true;
+}
+function rememberPreference(barcode) {
+  if (!activeUserId || !barcode) return;
+  const preferences = preferenceStore();
+  preferences[barcode] = { location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value };
+  try { localStorage.setItem('frigo-solo-preferences-' + activeUserId, JSON.stringify(preferences)); } catch {}
+}
 async function lookupProduct(code) {
   const clean = code.replace(/\D/g, '');
   if (clean.length < 8) return message(scanMessage, 'Entre un code-barres valide, ou utilise le scan.', true);
@@ -113,7 +137,10 @@ async function lookupProduct(code) {
     const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(clean)}.json?fields=product_name,product_name_fr,brands`);
     const data = await response.json(), product = data.product, productName = product?.product_name_fr || product?.product_name;
     if (!response.ok || !productName) { message(scanMessage, 'Produit introuvable : tu peux saisir son nom à la main.', true); return nameInput.focus(); }
-    nameInput.value = product.brands ? `${productName} — ${product.brands}` : productName; message(scanMessage, 'Produit trouvé. Il ne reste plus que la date.'); dateInput.focus();
+    nameInput.value = product.brands ? productName + ' — ' + product.brands : productName;
+    const restored = applyPreference(clean);
+    message(scanMessage, restored ? 'Produit trouvé : tes habitudes sont déjà remplies. Choisis la date.' : 'Produit trouvé. Choisis la date.');
+    openDateChoice();
   } catch { message(scanMessage, 'Impossible de contacter la base produits. Tu peux ajouter le nom à la main.', true); }
   finally { lookupButton.disabled = false; lookupButton.textContent = 'Chercher'; }
 }
@@ -159,7 +186,7 @@ async function startScanner() {
     lastScannedCode = code;
     await stopScanner();
     barcodeInput.value = code;
-    lookupProduct(code);
+    await lookupProduct(code);
   };
   let lastError;
   try {
@@ -281,6 +308,7 @@ form.addEventListener('submit', async (event) => {
   }
   addFoodButton.disabled = false; updateAddButton();
   if (error) return message(foodMessage, 'Impossible d’ajouter cet aliment. Réessaie.', true);
+  rememberPreference(barcodeInput.value);
   form.reset(); quantityInput.value = 1; await loadFoods(); await stopScanner(); if (foodDialog.open) foodDialog.close(); message(authMessage, 'Article ajouté à ton stock.');
   updateAddButton();
 });
