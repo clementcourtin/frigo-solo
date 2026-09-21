@@ -1,8 +1,8 @@
-const CACHE_NAME = 'frigo-solo-v6';
+const CACHE_NAME = 'frigo-solo-v7';
 const APP_SHELL = [
   './',
   './index.html',
-  './style.css?v=20260921-mobilefix',
+  './style.css?v=20260921-datefix',
   './app.js?v=20260921-addform',
   './manifest.webmanifest',
   './frigo-solo-icon-512.png',
@@ -27,7 +27,6 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
@@ -40,7 +39,6 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
-
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
       const copy = response.clone();
