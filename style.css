@@ -150,73 +150,44 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 }
 
 
-/* Formulaire d’ajout : alignement compact et fiable sur mobile */
+/* Formulaire d’ajout : une seule règle mobile cohérente */
 .barcode-row > label { display: block; }
 .barcode-row > label > input { display: block; margin-top: 7px; }
 .details-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.details-row label { min-width: 0; }
+.details-row label, #food-form > label { min-width: 0; max-width: 100%; }
 .details-row input, .details-row select { padding-inline: 10px; }
-.food-dialog, .add-card, #food-form, #food-form > label { min-width: 0; max-width: 100%; }
-#food-date { display: block; inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; }
-
-@media (max-width: 480px) {
-  .food-dialog { width: calc(100vw - 20px); max-width: calc(100vw - 20px); overflow: hidden; }
-  .add-card { padding: 16px; overflow: hidden; }
-  .details-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-  .details-row label { font-size: .78rem; }
-  .details-row input, .details-row select { min-width: 0; min-height: 44px; padding-inline: 8px; font-size: .86rem; }
-  .food-dialog input[type="date"] { display: block; inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; padding-inline: 9px; font-size: 16px; }
-  .food-dialog input[type="date"]::-webkit-date-and-time-value { min-width: 0; max-width: 100%; text-align: left; }
-}
-
-
-/* Finition iPhone : dimensions parfaitement uniformes */
-.details-row input, .details-row select { box-sizing: border-box; height: 48px; min-height: 48px; padding-block: 0; }
-.details-row input[type=number] { appearance: textfield; -moz-appearance: textfield; }
-.details-row input[type=number]::-webkit-inner-spin-button, .details-row input[type=number]::-webkit-outer-spin-button { appearance: none; margin: 0; }
-#food-form > label:has(#food-date) { min-width: 0; overflow: hidden; }
-#food-date { box-sizing: border-box; inline-size: 100%; width: 100%; min-width: 0; max-width: 100%; height: 48px; min-height: 48px; padding-block: 0; }
-
-@media (max-width: 480px) {
-  .food-dialog { width: calc(100vw - 28px); max-width: calc(100vw - 28px); }
-  .add-card { padding: 14px; }
-  .details-row input, .details-row select { height: 44px; min-height: 44px; }
-  #food-date { display: block; inline-size: 100%; width: 100%; min-width: 0; max-width: 100%; height: 44px; min-height: 44px; padding: 0 5px 0 8px; font-size: 16px; }
-  #food-date::-webkit-date-and-time-value { min-width: 0; max-width: 100%; }
-}
-
-
-/* Date : contrôle natif iPhone, sans rognage */
-#food-form > label:has(#food-date) { overflow: visible; }
-#food-date { border-radius: 11px; padding-inline: 13px; text-align: center; }
-@media (max-width: 480px) {
-  #food-date { border-radius: 11px; padding-inline: 10px; text-align: center; }
-}
-
-
-/* Bouton de date : design propre, sélecteur Apple conservé */
-#food-form > label:has(#food-date) { gap: 8px; overflow: visible; }
+.food-dialog, .add-card, #food-form { min-width: 0; max-width: 100%; }
 #food-date {
   display: block;
   box-sizing: border-box;
-  inline-size: 100% !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-  height: 54px !important;
-  min-height: 54px !important;
+  inline-size: 100%;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 48px;
+  min-height: 48px;
   margin: 0;
-  padding: 0 15px !important;
-  border: 1px solid #bcd4ad !important;
-  border-radius: 15px !important;
-  background: #ffffff !important;
-  color: #233322;
-  font: inherit;
-  font-weight: 700;
-  text-align: left;
-  box-shadow: inset 0 1px 0 #ffffff, 0 1px 2px #23332212;
+  padding-inline: 13px;
+  text-align: center;
 }
-#food-date:focus { outline: 3px solid #d8ebc9; border-color: #77a358 !important; }
+
 @media (max-width: 480px) {
-  #food-date { height: 52px !important; min-height: 52px !important; padding-inline: 14px !important; border-radius: 14px !important; }
+  .food-dialog { width: calc(100vw - 20px); max-width: calc(100vw - 20px); }
+  .add-card { padding: 16px; }
+  .details-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .details-row label { font-size: .78rem; }
+  .details-row input, .details-row select { min-width: 0; height: 44px; min-height: 44px; padding-inline: 8px; font-size: .86rem; }
+  #food-date {
+    height: 44px;
+    min-height: 44px;
+    padding-inline: 10px;
+    font-size: 16px;
+    text-align: center;
+  }
+  #food-date::-webkit-date-and-time-value,
+  #food-date::-webkit-datetime-edit {
+    min-width: 0;
+    padding: 0;
+    text-align: center;
+  }
 }
