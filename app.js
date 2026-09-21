@@ -188,7 +188,16 @@ async function startScanner() {
   if (!navigator.mediaDevices?.getUserMedia) return message(scanMessage, 'Ton navigateur ne permet pas d’ouvrir la caméra. Utilise le champ ci-dessous.', true);
   scannerElement.hidden = false; scanButton.textContent = 'Arrêter le scan'; message(scanMessage, 'Ouverture de la caméra…'); lastScannedCode = '';
   await disposeScanner();
-  const scanConfig = { fps: 10, qrbox: { width: 280, height: 150 }, aspectRatio: 1.777, disableFlip: true };
+  const scanConfig = {
+    fps: 10,
+    qrbox: { width: 280, height: 150 },
+    aspectRatio: 1.777,
+    disableFlip: true,
+    videoConstraints: {
+      facingMode: { ideal: 'environment' },
+      zoom: { ideal: 2 },
+    },
+  };
   const onCodeRead = async (code) => {
     if (code === lastScannedCode) return;
     lastScannedCode = code;
@@ -200,7 +209,7 @@ async function startScanner() {
   try {
     const cameras = await Html5Qrcode.getCameras();
     const rearCamera = cameras.find((camera) => /back|rear|environment|arrière/i.test(camera.label));
-    const attempts = [rearCamera?.id, cameras[0]?.id, { facingMode: 'environment' }, { facingMode: 'user' }].filter((camera, index, all) => camera && all.indexOf(camera) === index);
+    const attempts = [{ facingMode: { ideal: 'environment' }, zoom: { ideal: 2 } }, rearCamera?.id, cameras[0]?.id, { facingMode: 'environment' }, { facingMode: 'user' }].filter((camera, index, all) => camera && all.indexOf(camera) === index);
     for (const camera of attempts) {
       try {
         scanner = createScanner();
