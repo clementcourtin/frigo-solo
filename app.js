@@ -145,10 +145,18 @@ async function lookupProduct(code) {
   finally { lookupButton.disabled = false; lookupButton.textContent = 'Chercher'; }
 }
 function resetScanControls() { torchOn = false; scanControls.hidden = true; torchButton.hidden = true; torchButton.classList.remove('active'); torchButton.textContent = '🔦 Lampe'; }
-function setupCameraControls() {
+async function setupCameraControls() {
   resetScanControls();
   if (!scanner) return;
   const capabilities = scanner.getRunningTrackCameraCapabilities?.() || scanner.getRunningTrackCapabilities?.() || {};
+  const zoom = capabilities.zoom;
+  if (zoom) {
+    const min = Number(zoom.min ?? 1), max = Number(zoom.max ?? 1);
+    const target = Math.min(2, max);
+    if (target >= min) {
+      try { await scanner.applyVideoConstraints({ advanced: [{ zoom: target }] }); } catch {}
+    }
+  }
   if (capabilities.torch) { scanControls.hidden = false; torchButton.hidden = false; }
 }
 async function disposeScanner() {
@@ -199,7 +207,7 @@ async function startScanner() {
         await scanner.start(camera, scanConfig, onCodeRead, () => {});
         isScanning = true;
         message(scanMessage, 'Cadre le code à plat et attends une seconde.');
-        setupCameraControls();
+        await setupCameraControls();
         return;
       } catch (error) {
         lastError = error;
