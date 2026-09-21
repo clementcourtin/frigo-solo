@@ -124,7 +124,7 @@
           <button class="filter-button" type="button" data-location="Congélateur" aria-pressed="false">Congélateur</button>
           <button class="filter-button" type="button" data-location="Placard" aria-pressed="false">Placard</button>
         </div>
-        <p id="empty-state" class="empty">Ton frigo est vide par ici. Ajoute ton premier aliment.</p>
+        <p id="empty-state" class="empty">Ton stock est vide par ici. Ajoute ton premier aliment.</p>
         <ul id="foods" aria-live="polite"></ul>
       </section>
 
@@ -205,7 +205,7 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260921-zoom2"></script>
+    <script type="module" src="app.js?v=20260921-accountfix"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
