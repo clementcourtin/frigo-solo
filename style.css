@@ -148,3 +148,23 @@ ul { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
   .privacy-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
   .privacy-card { max-height: calc(100dvh - 20px); padding: 19px; }
 }
+
+
+/* Formulaire d’ajout : alignement compact et fiable sur mobile */
+.barcode-row > label { display: block; }
+.barcode-row > label > input { display: block; margin-top: 7px; }
+.details-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.details-row label { min-width: 0; }
+.details-row input, .details-row select { padding-inline: 10px; }
+.food-dialog, .add-card, #food-form, #food-form > label { min-width: 0; max-width: 100%; }
+#food-date { display: block; inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; }
+
+@media (max-width: 480px) {
+  .food-dialog { width: calc(100vw - 20px); max-width: calc(100vw - 20px); overflow: hidden; }
+  .add-card { padding: 16px; overflow: hidden; }
+  .details-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .details-row label { font-size: .78rem; }
+  .details-row input, .details-row select { min-width: 0; min-height: 44px; padding-inline: 8px; font-size: .86rem; }
+  .food-dialog input[type="date"] { display: block; inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; padding-inline: 9px; font-size: 16px; }
+  .food-dialog input[type="date"]::-webkit-date-and-time-value { min-width: 0; max-width: 100%; text-align: left; }
+}
