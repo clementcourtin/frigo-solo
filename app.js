@@ -248,8 +248,8 @@ async function changeQuantity(item, direction) {
   loadFoods();
 }
 async function addToShopping(name) {
-  const { error } = await supabase.from('shopping_items').insert({ name });
-  if (error) return message(authMessage, 'Impossible d’ajouter cet article à la liste de courses.', true);
+  const { error } = await supabase.from('shopping_items').insert({ user_id: activeUserId, name });
+  if (error) return message(authMessage, 'Impossible d’ajouter cet article : ' + error.message', true);
   message(authMessage, `« ${name} » a été ajouté à la liste de courses.`); loadShopping();
 }
 async function toggleShopping(id, checked) {
@@ -319,12 +319,12 @@ form.addEventListener('submit', async (event) => {
   addFoodButton.disabled = true; addFoodButton.textContent = 'Ajout…';
   let error;
   try {
-    ({ error } = await supabase.from('food_items').insert({ name: nameInput.value.trim(), expires_on: dateInput.value, barcode: barcodeInput.value || null, location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value }));
+    ({ error } = await supabase.from('food_items').insert({ user_id: activeUserId, name: nameInput.value.trim(), expires_on: dateInput.value, barcode: barcodeInput.value || null, location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value }));
   } catch {
-    error = true;
+    error = { message: 'Erreur de connexion' };
   }
   addFoodButton.disabled = false; updateAddButton();
-  if (error) return message(foodMessage, 'Impossible d’ajouter cet aliment. Réessaie.', true);
+  if (error) return message(foodMessage, 'Impossible d’ajouter cet aliment : ' + error.message', true);
   rememberPreference(barcodeInput.value);
   form.reset(); quantityInput.value = 1; await loadFoods(); await stopScanner(); if (foodDialog.open) foodDialog.close(); message(authMessage, 'Article ajouté à ton stock.');
   updateAddButton();
