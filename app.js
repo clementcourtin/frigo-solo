@@ -249,7 +249,7 @@ async function changeQuantity(item, direction) {
 }
 async function addToShopping(name) {
   const { error } = await supabase.from('shopping_items').insert({ user_id: activeUserId, name });
-  if (error) return message(authMessage, 'Impossible d’ajouter cet article : ' + error.message', true);
+  if (error) return message(authMessage, 'Impossible d’ajouter cet article : ' + error.message, true);
   message(authMessage, `« ${name} » a été ajouté à la liste de courses.`); loadShopping();
 }
 async function toggleShopping(id, checked) {
@@ -324,7 +324,7 @@ form.addEventListener('submit', async (event) => {
     error = { message: 'Erreur de connexion' };
   }
   addFoodButton.disabled = false; updateAddButton();
-  if (error) return message(foodMessage, 'Impossible d’ajouter cet aliment : ' + error.message', true);
+  if (error) return message(foodMessage, 'Impossible d’ajouter cet aliment : ' + error.message, true);
   rememberPreference(barcodeInput.value);
   form.reset(); quantityInput.value = 1; await loadFoods(); await stopScanner(); if (foodDialog.open) foodDialog.close(); message(authMessage, 'Article ajouté à ton stock.');
   updateAddButton();
