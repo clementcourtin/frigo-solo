@@ -66,13 +66,9 @@ function render() {
     node.querySelector('.shop-button').addEventListener('click', () => addToShopping(item.name));
     node.querySelector('.consume-button').addEventListener('click', () => consumeFood(item.id));
     let swipeStartX = 0, swipeStartY = 0;
-    row.addEventListener('touchstart', (event) => { const touch = event.changedTouches[0]; swipeStartX = touch.clientX; swipeStartY = touch.clientY; }, { passive: true });
-    row.addEventListener('touchend', (event) => {
-      const touch = event.changedTouches[0], distanceX = touch.clientX - swipeStartX, distanceY = touch.clientY - swipeStartY;
-      if (Math.abs(distanceX) < 72 || Math.abs(distanceX) < Math.abs(distanceY)) return;
-      if (distanceX < 0) consumeFood(item.id);
-      else addToShopping(item.name);
-    }, { passive: true });
+    row.addEventListener('touchstart', (event) => { const t = event.changedTouches[0]; swipeStartX = t.clientX; swipeStartY = t.clientY; row.style.transition = 'none'; }, { passive: true });
+    row.addEventListener('touchmove', (event) => { const t = event.changedTouches[0], x = t.clientX - swipeStartX, y = t.clientY - swipeStartY; if (Math.abs(x) > Math.abs(y)) { row.style.transform = 'translateX(' + x + 'px)'; row.style.opacity = String(1 - Math.min(Math.abs(x) / 900, .3)); } }, { passive: true });
+    row.addEventListener('touchend', (event) => { const t = event.changedTouches[0], x = t.clientX - swipeStartX, y = t.clientY - swipeStartY; row.style.transition = 'transform 180ms ease, opacity 180ms ease'; if (Math.abs(x) < 72 || Math.abs(x) < Math.abs(y)) { row.style.transform = ''; row.style.opacity = ''; return; } row.style.transform = 'translateX(' + (x < 0 ? '-110%' : '110%') + ')'; setTimeout(() => { if (x < 0) consumeFood(item.id); else { addToShopping(item.name); row.style.transform = ''; row.style.opacity = ''; } }, 180); }, { passive: true });
     foods.append(node);
   }
 }
