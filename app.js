@@ -65,6 +65,14 @@ function render() {
     node.querySelector('.quantity-plus').addEventListener('click', () => changeQuantity(item, 1));
     node.querySelector('.shop-button').addEventListener('click', () => addToShopping(item.name));
     node.querySelector('.consume-button').addEventListener('click', () => consumeFood(item.id));
+    let swipeStartX = 0, swipeStartY = 0;
+    row.addEventListener('touchstart', (event) => { const touch = event.changedTouches[0]; swipeStartX = touch.clientX; swipeStartY = touch.clientY; }, { passive: true });
+    row.addEventListener('touchend', (event) => {
+      const touch = event.changedTouches[0], distanceX = touch.clientX - swipeStartX, distanceY = touch.clientY - swipeStartY;
+      if (Math.abs(distanceX) < 72 || Math.abs(distanceX) < Math.abs(distanceY)) return;
+      if (distanceX < 0) consumeFood(item.id);
+      else addToShopping(item.name);
+    }, { passive: true });
     foods.append(node);
   }
 }
