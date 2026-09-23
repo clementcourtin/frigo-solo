@@ -137,6 +137,7 @@ function rememberPreference(barcode) {
   preferences[barcode] = { location: locationInput.value, quantity: quantityInput.value, unit: unitInput.value };
   try { localStorage.setItem('frigo-solo-preferences-' + activeUserId, JSON.stringify(preferences)); } catch {}
 }
+function conciseProductName(name) { return name.length > 72 ? name.slice(0, 72).replace(/[,;:-][^,;:-]*$/, '').trim() : name.trim(); }
 async function lookupProduct(code) {
   const clean = code.replace(/\D/g, '');
   if (clean.length < 8) return message(scanMessage, 'Entre un code-barres valide, ou utilise le scan.', true);
@@ -145,7 +146,9 @@ async function lookupProduct(code) {
     const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(clean)}.json?fields=product_name,product_name_fr,brands`);
     const data = await response.json(), product = data.product, productName = product?.product_name_fr || product?.product_name;
     if (!response.ok || !productName) { message(scanMessage, 'Produit introuvable : tu peux saisir son nom à la main.', true); return nameInput.focus(); }
-    nameInput.value = product.brands ? productName + ' — ' + product.brands : productName;
+    const brand = product.brands?.split(',')[0].trim();
+    const conciseName = conciseProductName(productName);
+    nameInput.value = brand ? brand + ' — ' + conciseName : conciseName;
     const restored = applyPreference(clean);
     message(scanMessage, restored ? 'Produit trouvé : tes habitudes sont déjà remplies. Choisis la date.' : 'Produit trouvé. Choisis la date.');
     openDateChoice();
