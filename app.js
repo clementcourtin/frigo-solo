@@ -21,6 +21,36 @@ const shoppingItems = $('#shopping-items'), shoppingEmpty = $('#shopping-empty')
 const filterButtons = [...document.querySelectorAll('.filter-button')];
 const addFoodButton = form.querySelector('button[type="submit"]');
 let entries = [], shoppingEntries = [], activeLocation = 'all', scanner, isScanning = false, torchOn = false, lastScannedCode = '', activeUserId = '';
+let publicSettings = { maintenance: { enabled: false, message: '' }, banner: { enabled: false, message: '' } };
+function isMaintenance() { return Boolean(publicSettings.maintenance?.enabled); }
+function showServiceNotice() {
+  const maintenance = publicSettings.maintenance || {}, banner = publicSettings.banner || {};
+  const visible = maintenance.enabled || banner.enabled;
+  let notice = document.querySelector('#service-notice');
+  if (!visible) { notice?.remove(); return; }
+  if (!notice) {
+    notice = document.createElement('p');
+    notice.id = 'service-notice';
+    notice.setAttribute('role', 'status');
+    notice.style.cssText = 'margin:0 0 16px;padding:12px 14px;border:1px solid #e6c991;border-radius:14px;background:#fff4df;color:#74531b;font-size:.86rem;font-weight:700;line-height:1.4';
+    const shell = document.querySelector('main.shell');
+    shell?.insertBefore(notice, shell.firstChild);
+  }
+  notice.textContent = maintenance.enabled
+    ? (maintenance.message || 'Frigo Solo fait une petite pause technique. Les modifications seront bientôt de retour.')
+    : banner.message;
+}
+async function loadPublicSettings() {
+  const { data } = await supabase.rpc('app_public_settings');
+  if (data) publicSettings = data;
+  showServiceNotice();
+}
+function maintenanceBlocked(target = authMessage) {
+  if (!isMaintenance()) return false;
+  message(target, publicSettings.maintenance?.message || 'Frigo Solo est temporairement en maintenance. Réessaie dans quelques instants.', true);
+  return true;
+}
+
 function barcodeFormats() {
   const formats = window.Html5QrcodeSupportedFormats;
   return [formats.EAN_13, formats.EAN_8, formats.UPC_A, formats.UPC_E];
@@ -106,9 +136,9 @@ async function setCalendarLink() {
   calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
 async function setSession(session) {
-  const user = session?.user, connected = Boolean(user); activeUserId = user?.id || ''; addTrigger.hidden = !connected; authCard.hidden = connected; if (connected) authCodeRow.hidden = true; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
+  const user = session?.user, connected = Boolean(user); activeUserId = user?.id || ''; addTrigger.hidden = !connected || isMaintenance(); authCard.hidden = connected; if (connected) authCodeRow.hidden = true; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
-  if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), setCalendarLink()]); }
+  if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), isMaintenance() ? Promise.resolve() : setCalendarLink()]); }
   else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; if (foodDialog.open) foodDialog.close(); render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
 
@@ -242,14 +272,17 @@ async function toggleTorch() {
   try { torchOn = !torchOn; await scanner.applyVideoConstraints({ advanced: [{ torch: torchOn }] }); torchButton.classList.toggle('active', torchOn); torchButton.textContent = torchOn ? '🔦 Lampe allumée' : '🔦 Lampe'; }
   catch { torchOn = false; message(scanMessage, 'La lampe n’est pas disponible avec cet appareil.', true); }
 }
-async function removeFood(id) { const { error } = await supabase.from('food_items').delete().eq('id', id); if (error) return message(authMessage, 'Impossible de supprimer cet aliment.', true); loadFoods(); }
+async function removeFood(id) {
+  if (maintenanceBlocked()) return; const { error } = await supabase.from('food_items').delete().eq('id', id); if (error) return message(authMessage, 'Impossible de supprimer cet aliment.', true); loadFoods(); }
 async function consumeFood(id) {
+  if (maintenanceBlocked()) return;
   const { error } = await supabase.from('food_items').delete().eq('id', id);
   if (error) return message(authMessage, 'Impossible de marquer cet aliment comme consommé.', true);
   message(authMessage, 'Bon appétit ! Aliment retiré du frigo.');
   loadFoods();
 }
 async function changeQuantity(item, direction) {
+  if (maintenanceBlocked()) return;
   const step = quantityStep(item), current = Number(item.quantity || 1);
   const next = Math.max(step, Math.round((current + direction * step) * 100) / 100);
   if (next === current) return;
@@ -258,16 +291,19 @@ async function changeQuantity(item, direction) {
   loadFoods();
 }
 async function addToShopping(name) {
+  if (maintenanceBlocked()) return;
   const { error } = await supabase.from('shopping_items').insert({ user_id: activeUserId, name });
   if (error) return message(authMessage, 'Impossible d’ajouter cet article : ' + error.message, true);
   message(authMessage, `« ${name} » a été ajouté à la liste de courses.`); loadShopping();
 }
 async function toggleShopping(id, checked) {
+  if (maintenanceBlocked()) return;
   const { error } = await supabase.from('shopping_items').update({ checked }).eq('id', id);
   if (error) return message(authMessage, 'Impossible de mettre à jour la liste de courses.', true);
   loadShopping();
 }
 async function deleteShopping(id) {
+  if (maintenanceBlocked()) return;
   const { error } = await supabase.from('shopping_items').delete().eq('id', id);
   if (error) return message(authMessage, 'Impossible de supprimer cet article.', true);
   loadShopping();
@@ -325,6 +361,7 @@ copyCalendarLink.addEventListener('click', async () => {
 });
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (maintenanceBlocked(foodMessage)) return;
   if (!form.reportValidity()) return;
   addFoodButton.disabled = true; addFoodButton.textContent = 'Ajout…';
   let error;
@@ -340,6 +377,7 @@ form.addEventListener('submit', async (event) => {
   updateAddButton();
 });
 clearAll.addEventListener('click', async () => {
+  if (maintenanceBlocked()) return;
   if (!confirm('Supprimer tous les aliments ?')) return;
   const { error } = await supabase.from('food_items').delete().in('id', entries.map((item) => item.id));
   if (error) return message(authMessage, 'Impossible de vider le frigo.', true); loadFoods();
@@ -350,6 +388,7 @@ shoppingForm.addEventListener('submit', async (event) => {
   await addToShopping(name); shoppingForm.reset(); shoppingName.focus();
 });
 clearBought.addEventListener('click', async () => {
+  if (maintenanceBlocked()) return;
   const boughtIds = shoppingEntries.filter((item) => item.checked).map((item) => item.id);
   if (!boughtIds.length) return;
   const { error } = await supabase.from('shopping_items').delete().in('id', boughtIds);
@@ -368,4 +407,4 @@ locationInput.addEventListener('change', updateAddButton); showCalendar.addEvent
 addTrigger.addEventListener('click', () => { message(foodMessage, ''); foodDialog.showModal(); requestAnimationFrame(() => nameInput.focus()); });
 closeAdd.addEventListener('click', async () => { await stopScanner(); foodDialog.close(); });
 foodDialog.addEventListener('click', async (event) => { if (event.target === foodDialog) { await stopScanner(); foodDialog.close(); } });
-const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
+await loadPublicSettings(); const { data: { session } } = await supabase.auth.getSession(); await setSession(session); supabase.auth.onAuthStateChange((_event, nextSession) => setSession(nextSession));
