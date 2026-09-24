@@ -9,7 +9,7 @@ const form = $('#food-form'), authForm = $('#auth-form'), email = $('#email'), a
 const foodDialog = $('#food-dialog'), addTrigger = $('#open-add'), closeAdd = $('#close-add'), signedInEmail = $('#signed-in-email');
 const authMessage = $('#auth-message'), foodMessage = $('#food-message'), nameInput = $('#food-name'), dateInput = $('#food-date');
 const calendarSetup = $('#calendar-setup'), calendarLink = $('#calendar-link'), copyCalendarLink = $('#copy-calendar-link');
-const authCard = $('#auth-card'), accountBar = $('#account-bar'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
+const authCard = $('#auth-card'), accountBar = $('#account-bar'), adminLink = $('#admin-link'), showCalendar = $('#show-calendar'), hideCalendar = $('#hide-calendar');
 const deleteAccountButton = $('#delete-account'), privacyDialog = $('#privacy-dialog'), showPrivacy = $('#show-privacy'), closePrivacy = $('#close-privacy');
 const barcodeInput = $('#barcode'), locationInput = $('#food-location'), quantityInput = $('#food-quantity'), unitInput = $('#food-unit');
 const lookupButton = $('#lookup-barcode'), scanButton = $('#start-scan'), scannerElement = $('#scanner'), scanMessage = $('#scan-message');
@@ -135,9 +135,18 @@ async function setCalendarLink() {
   if (createError || !feed) return message(authMessage, 'Impossible de préparer ton calendrier.', true);
   calendarLink.value = `${calendarEndpoint}/${feed.token}.ics`;
 }
+async function updateAdminLink(connected) {
+  if (!adminLink) return;
+  adminLink.hidden = true;
+  if (!connected) return;
+  const { data } = await supabase.rpc('app_is_admin');
+  adminLink.hidden = !data;
+}
+
 async function setSession(session) {
   const user = session?.user, connected = Boolean(user); activeUserId = user?.id || ''; addTrigger.hidden = !connected || isMaintenance(); authCard.hidden = connected; if (connected) authCodeRow.hidden = true; accountBar.hidden = !connected; $('#food-list').hidden = !connected;
   shoppingCard.hidden = !connected;
+  await updateAdminLink(connected);
   if (connected) { signedInEmail.textContent = `● Synchronisé · ${user.email}`; await Promise.all([loadFoods(), loadShopping(), isMaintenance() ? Promise.resolve() : setCalendarLink()]); }
   else { entries = []; shoppingEntries = []; signedInEmail.textContent = ''; if (foodDialog.open) foodDialog.close(); render(); renderShopping(); calendarSetup.hidden = true; message(authMessage, ''); }
 }
@@ -326,6 +335,7 @@ verifyAuthCode.addEventListener('click', async () => {
 });
 authCode.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); verifyAuthCode.click(); } });
 $('#sign-out').addEventListener('click', () => supabase.auth.signOut());
+adminLink?.addEventListener('click', () => { window.location.href = './admin.html'; });
 deleteAccountButton.addEventListener('click', async () => {
   const approved = confirm('Supprimer définitivement ton compte, ton stock, ta liste de courses et ton calendrier ? Cette action est irréversible.');
   if (!approved) return;
