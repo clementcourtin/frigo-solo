@@ -87,6 +87,7 @@
             </label>
             <label>Unité
               <select id="food-unit" name="unit">
+                <option value="paquet">paquet</option>
                 <option value="pièce">pièce</option>
                 <option value="pot">pot</option>
                 <option value="bouteille">bouteille</option>
@@ -206,7 +207,7 @@
       </li>
     </template>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script type="module" src="app.js?v=20260924-admin2"></script>
+    <script type="module" src="app.js?v=20260925-units3"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
