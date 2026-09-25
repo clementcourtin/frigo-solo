@@ -150,7 +150,13 @@
     async function invoke(action, userId) {
       const { data: { session } } = await s.auth.getSession(); if (!session) throw new Error('Ta session a expiré.');
       const { data, error } = await s.functions.invoke('admin-ops', { headers: { Authorization: 'Bearer ' + session.access_token }, body: { action, target_user_id: userId } });
-      if (error) throw error; if (data?.error) throw new Error(data.error); return data;
+      if (error) {
+        let detail;
+        try { detail = await error.context?.json?.(); } catch {}
+        throw new Error(detail?.error || 'Action impossible pour le moment.');
+      }
+      if (data?.error) throw new Error(data.error);
+      return data;
     }
     function replaceLines(target, rows, map) { const root = $(target); root.replaceChildren(); if (!rows?.length) { root.append(textNode('p', 'Aucune donnée.', 'muted')); return; } rows.forEach((row) => root.append(map(row))); }
     function line(title, detail) { const item = document.createElement('div'); item.className = 'data-line'; item.append(textNode('strong', title), textNode('small', detail)); return item; }
