@@ -1,17 +1,9 @@
 // Frigo Solo — Supabase Edge Function: admin-ops
-// Deploy this file as the `admin-ops` function (verify JWT enabled).
-// The service-role key is read only from Supabase's server environment.
+// Deploy as `admin-ops` with "Verify JWT with legacy secret" set to OFF.
+// Every request is authenticated below and mutations remain owner-only.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL');
-function keyFromEnvironment(jsonName: string, fallbackName: string) {
-  try { return JSON.parse(Deno.env.get(jsonName) ?? '{}').default ?? Deno.env.get(fallbackName); }
-  catch { return Deno.env.get(fallbackName); }
-}
-const anonKey = keyFromEnvironment('SUPABASE_PUBLISHABLE_KEYS', 'SUPABASE_ANON_KEY');
-const serviceRoleKey = keyFromEnvironment('SUPABASE_SECRET_KEYS', 'SUPABASE_SERVICE_ROLE_KEY');
-if (!supabaseUrl || !anonKey || !serviceRoleKey) throw new Error('Variables Supabase manquantes');
 const allowedOrigins = new Set([
   'https://frigosolo.com',
   'https://www.frigosolo.com',
@@ -19,143 +11,253 @@ const allowedOrigins = new Set([
 ]);
 
 class HttpError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  constructor(public status: number, message: string) {
+    super(message);
+  }
 }
 
-function cors(req: Request, strict = true) {
-  const origin = req.headers.get('origin');
-  if (origin && !allowedOrigins.has(origin)) {
-    if (strict) throw new HttpError(403, 'Origine refusée');
-    return { 'Vary': 'Origin' };
+function keyFromEnvironment(jsonName: string, fallbackName: string) {
+  const fallback = Deno.env.get(fallbackName);
+  const raw = Deno.env.get(jsonName);
+  if (!raw) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === 'string') return parsed;
+    return typeof parsed?.default === 'string' ? parsed.default : fallback;
+  } catch {
+    return fallback;
   }
+}
+
+function config() {
+  const url = Deno.env.get('SUPABASE_URL');
+  const publishableKey = keyFromEnvironment('SUPABASE_PUBLISHABLE_KEYS', 'SUPABASE_ANON_KEY');
+  const serviceRoleKey = keyFromEnvironment('SUPABASE_SECRET_KEYS', 'SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !publishableKey || !serviceRoleKey) {
+    throw new HttpError(500, 'Configuration serveur indisponible');
+  }
+  return { url, publishableKey, serviceRoleKey };
+}
+
+function corsHeaders(request: Request) {
+  const origin = request.headers.get('origin');
   return {
-    ...(origin ? { 'Access-Control-Allow-Origin': origin } : {}),
+    ...(origin && allowedOrigins.has(origin) ? { 'Access-Control-Allow-Origin': origin } : {}),
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Max-Age': '86400',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
     'Vary': 'Origin',
   };
 }
 
-function reply(req: Request, payload: unknown, status = 200) {
-  return new Response(JSON.stringify(payload), {
-    status,
-    headers: { ...cors(req, false), 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
-  });
+function reply(request: Request, payload: unknown, status = 200) {
+  return new Response(JSON.stringify(payload), { status, headers: corsHeaders(request) });
+}
+
+function requireAllowedOrigin(request: Request) {
+  const origin = request.headers.get('origin');
+  if (origin && !allowedOrigins.has(origin)) throw new HttpError(403, 'Origine refusée');
 }
 
 function isUuid(value: unknown): value is string {
   return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-function service() {
-  return createClient(supabaseUrl, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
+function isMissingTable(error: unknown) {
+  const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : '';
+  return code === '42P01' || code === 'PGRST205';
 }
 
-async function owner(req: Request) {
-  const authorization = req.headers.get('authorization');
+function errorCode(error: unknown) {
+  return error && typeof error === 'object' && 'code' in error ? String(error.code) : 'unknown';
+}
+
+function service() {
+  const { url, serviceRoleKey } = config();
+  return createClient(url, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+async function requireOwner(request: Request) {
+  const authorization = request.headers.get('authorization');
   if (!authorization?.startsWith('Bearer ')) throw new HttpError(401, 'Session requise');
-  const caller = createClient(supabaseUrl, anonKey, {
+  const { url, publishableKey } = config();
+  const caller = createClient(url, publishableKey, {
     global: { headers: { Authorization: authorization } },
     auth: { autoRefreshToken: false, persistSession: false },
   });
-  const { data: { user }, error } = await caller.auth.getUser();
-  if (error || !user) throw new HttpError(401, 'Session invalide');
+  const { data: { user }, error: userError } = await caller.auth.getUser();
+  if (userError || !user) throw new HttpError(401, 'Session invalide');
 
   const admin = service();
-  const { data: row, error: roleError } = await admin.from('app_admins').select('role').eq('user_id', user.id).maybeSingle();
+  const { data: role, error: roleError } = await admin
+    .from('app_admins')
+    .select('role')
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (roleError) throw new HttpError(500, 'Vérification des droits impossible');
-  if (row?.role !== 'owner') throw new HttpError(403, 'Droit propriétaire requis');
+  if (role?.role !== 'owner') throw new HttpError(403, 'Droit propriétaire requis');
   return { user, admin };
 }
 
-async function writeAudit(admin: ReturnType<typeof service>, actorId: string, targetId: string | null, action: string, outcome: 'started' | 'succeeded' | 'failed', metadata: Record<string, unknown> = {}, errorCode?: string) {
-  const { data, error } = await admin.from('admin_audit_logs').insert({ actor_id: actorId, target_user_id: targetId, action, outcome, metadata, error_code: errorCode ?? null, completed_at: outcome === 'started' ? null : new Date().toISOString() }).select('id').single();
-  if (error || !data) throw new HttpError(503, 'Journal d’administration indisponible');
-  return data.id as string;
+async function checkedDelete(
+  admin: ReturnType<typeof service>,
+  table: string,
+  column: string,
+  userId: string,
+) {
+  const { error } = await admin.from(table).delete().eq(column, userId);
+  if (error && !isMissingTable(error)) {
+    console.error('admin_cleanup_failed', { table, column, code: errorCode(error) });
+    throw new HttpError(500, 'Purge partielle impossible');
+  }
 }
 
-async function finishAudit(admin: ReturnType<typeof service>, id: string, outcome: 'succeeded' | 'failed', errorCode?: string) {
-  await admin.from('admin_audit_logs').update({ outcome, error_code: errorCode ?? null, completed_at: new Date().toISOString() }).eq('id', id);
+async function purgeAccountData(admin: ReturnType<typeof service>, userId: string) {
+  await checkedDelete(admin, 'food_items', 'user_id', userId);
+  await checkedDelete(admin, 'shopping_items', 'user_id', userId);
+  await checkedDelete(admin, 'calendar_feeds', 'user_id', userId);
+  await checkedDelete(admin, 'admin_notes', 'target_user_id', userId);
+  await checkedDelete(admin, 'admin_notes', 'actor_id', userId);
+  await checkedDelete(admin, 'app_admins', 'user_id', userId);
 }
 
-async function getTarget(admin: ReturnType<typeof service>, id: string) {
-  const { data, error } = await admin.auth.admin.getUserById(id);
+async function getTarget(admin: ReturnType<typeof service>, targetUserId: string) {
+  const { data, error } = await admin.auth.admin.getUserById(targetUserId);
   if (error || !data.user) throw new HttpError(404, 'Compte introuvable');
   return data.user;
 }
 
-async function purgeAccountData(admin: ReturnType<typeof service>, userId: string) {
-  for (const table of ['food_items', 'shopping_items', 'calendar_feeds', 'admin_notes']) {
-    const targetColumn = table === 'admin_notes' ? 'target_user_id' : 'user_id';
-    const { error } = await admin.from(table).delete().eq(targetColumn, userId);
-    if (error) throw new HttpError(500, 'Purge partielle impossible');
-  }
+async function writeAudit(
+  admin: ReturnType<typeof service>,
+  actorId: string,
+  targetUserId: string,
+  action: string,
+  outcome: 'started' | 'succeeded' | 'failed',
+  error?: string,
+) {
+  const { data, error: auditError } = await admin
+    .from('admin_audit_logs')
+    .insert({
+      actor_id: actorId,
+      target_user_id: targetUserId,
+      action,
+      outcome,
+      metadata: {},
+      error_code: error ?? null,
+      completed_at: outcome === 'started' ? null : new Date().toISOString(),
+    })
+    .select('id')
+    .single();
+  if (auditError || !data) throw new HttpError(503, 'Journal d’administration indisponible');
+  return data.id as string;
 }
 
-Deno.serve(async (req) => {
+async function finishAudit(
+  admin: ReturnType<typeof service>,
+  auditId: string,
+  outcome: 'succeeded' | 'failed',
+  error?: string,
+) {
+  const { error: auditError } = await admin
+    .from('admin_audit_logs')
+    .update({ outcome, error_code: error ?? null, completed_at: new Date().toISOString() })
+    .eq('id', auditId);
+  if (auditError) console.error('admin_audit_finish_failed', { code: errorCode(auditError) });
+}
+
+Deno.serve(async (request) => {
+  if (request.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders(request) });
+  }
+
   try {
-    if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
-    if (req.method !== 'POST') return reply(req, { error: 'Méthode refusée' }, 405);
+    requireAllowedOrigin(request);
+    if (request.method !== 'POST') throw new HttpError(405, 'Méthode refusée');
 
-    const body = await req.json().catch(() => null) as { action?: string; target_user_id?: string } | null;
+    const body = await request.json().catch(() => null) as {
+      action?: string;
+      target_user_id?: string;
+    } | null;
     if (!body || !isUuid(body.target_user_id)) throw new HttpError(400, 'Compte cible invalide');
-
-    const { user: actor, admin } = await owner(req);
-    if (body.target_user_id === actor.id && ['delete_account', 'suspend_account'].includes(body.action ?? '')) {
-      throw new HttpError(409, 'Utilise la suppression de compte personnelle pour cette action');
-    }
-    const target = await getTarget(admin, body.target_user_id);
-    const action = body.action;
-    if (!['suspend_account', 'restore_account', 'send_login_code', 'rotate_calendar', 'delete_account'].includes(action ?? '')) {
+    if (!['suspend_account', 'restore_account', 'send_login_code', 'rotate_calendar', 'delete_account'].includes(body.action ?? '')) {
       throw new HttpError(400, 'Action inconnue');
     }
 
-    const auditId = await writeAudit(admin, actor.id, target.id, action!, 'started', { target_email: target.email ?? null });
+    const { user: actor, admin } = await requireOwner(request);
+    if (body.target_user_id === actor.id && ['delete_account', 'suspend_account'].includes(body.action ?? '')) {
+      throw new HttpError(409, 'Utilise la suppression de compte personnelle pour cette action');
+    }
+
+    const target = await getTarget(admin, body.target_user_id);
+    const { data: targetRole, error: targetRoleError } = await admin
+      .from('app_admins')
+      .select('role')
+      .eq('user_id', target.id)
+      .maybeSingle();
+    if (targetRoleError) throw new HttpError(500, 'Vérification du compte impossible');
+    if (targetRole?.role === 'owner' && ['delete_account', 'suspend_account'].includes(body.action ?? '')) {
+      throw new HttpError(409, 'Un propriétaire ne peut pas être modifié depuis la console');
+    }
+
+    const auditId = await writeAudit(admin, actor.id, target.id, body.action!, 'started');
     try {
-      if (action === 'suspend_account') {
+      if (body.action === 'suspend_account') {
         const { error } = await admin.auth.admin.updateUserById(target.id, { ban_duration: '876000h' });
         if (error) throw new HttpError(500, 'Suspension impossible');
       }
-      if (action === 'restore_account') {
+      if (body.action === 'restore_account') {
         const { error } = await admin.auth.admin.updateUserById(target.id, { ban_duration: 'none' });
         if (error) throw new HttpError(500, 'Restauration impossible');
       }
-      if (action === 'send_login_code') {
+      if (body.action === 'send_login_code') {
         if (!target.email) throw new HttpError(409, 'Ce compte n’a pas d’adresse e-mail');
-        const auth = createClient(supabaseUrl, anonKey, { auth: { autoRefreshToken: false, persistSession: false } });
+        const { url, publishableKey } = config();
+        const auth = createClient(url, publishableKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        });
         const { error } = await auth.auth.signInWithOtp({
           email: target.email,
           options: { shouldCreateUser: false, emailRedirectTo: 'https://frigosolo.com/' },
         });
         if (error) throw new HttpError(502, 'Envoi impossible');
       }
-      if (action === 'rotate_calendar') {
-        // calendar_feeds.token est un UUID cryptographiquement aléatoire (122 bits).
-        const { data: existing, error: readError } = await admin.from('calendar_feeds').select('user_id').eq('user_id', target.id).maybeSingle();
-        if (readError) throw new HttpError(500, 'Calendrier introuvable');
+      if (body.action === 'rotate_calendar') {
         const token = crypto.randomUUID();
-        const result = existing
+        const { data: existing, error: readError } = await admin
+          .from('calendar_feeds')
+          .select('user_id')
+          .eq('user_id', target.id)
+          .maybeSingle();
+        if (readError) throw new HttpError(500, 'Calendrier introuvable');
+        const { error } = existing
           ? await admin.from('calendar_feeds').update({ token }).eq('user_id', target.id)
           : await admin.from('calendar_feeds').insert({ user_id: target.id, token });
-        if (result.error) throw new HttpError(500, 'Réinitialisation impossible');
+        if (error) throw new HttpError(500, 'Réinitialisation impossible');
       }
-      if (action === 'delete_account') {
-        const { data: role } = await admin.from('app_admins').select('role').eq('user_id', target.id).maybeSingle();
-        if (role?.role === 'owner') throw new HttpError(409, 'Un propriétaire ne peut pas être supprimé depuis la console');
+      if (body.action === 'delete_account') {
         await purgeAccountData(admin, target.id);
-        await admin.from('app_admins').delete().eq('user_id', target.id);
         const { error } = await admin.auth.admin.deleteUser(target.id);
-        if (error) throw new HttpError(500, 'Suppression du compte impossible');
+        if (error) {
+          console.error('admin_auth_delete_failed', { code: errorCode(error) });
+          throw new HttpError(500, 'Suppression du compte impossible');
+        }
       }
       await finishAudit(admin, auditId, 'succeeded');
-      return reply(req, { ok: true });
+      return reply(request, { ok: true });
     } catch (error) {
       await finishAudit(admin, auditId, 'failed', error instanceof HttpError ? String(error.status) : 'internal');
       throw error;
     }
   } catch (error) {
     const status = error instanceof HttpError ? error.status : 500;
-    return reply(req, { error: status >= 500 ? 'Action impossible pour le moment' : error.message }, status);
+    if (!(error instanceof HttpError)) console.error('admin_ops_unexpected_error', error);
+    return reply(request, {
+      error: status >= 500 ? 'Action impossible pour le moment' : error.message,
+    }, status);
   }
 });
