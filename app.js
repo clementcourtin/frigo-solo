@@ -333,30 +333,35 @@ verifyAuthCode.addEventListener('click', async () => {
 authCode.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); verifyAuthCode.click(); } });
 $('#sign-out').addEventListener('click', () => supabase.auth.signOut());
 adminLink?.addEventListener('click', () => { window.location.href = './admin.html'; });
+async function edgeErrorMessage(error, fallback) {
+  try {
+    const payload = await error?.context?.json?.();
+    if (typeof payload?.error === 'string') return payload.error;
+  } catch {}
+  return fallback;
+}
 deleteAccountButton.addEventListener('click', async () => {
   const approved = confirm('Supprimer définitivement ton compte, ton stock, ta liste de courses et ton calendrier ? Cette action est irréversible.');
   if (!approved) return;
   deleteAccountButton.disabled = true;
   deleteAccountButton.textContent = 'Suppression…';
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error('Ta session a expiré. Reconnecte-toi puis réessaie.');
+    const { data, error } = await supabase.functions.invoke('delete-account', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + session.access_token },
+    });
+    if (error) throw new Error(await edgeErrorMessage(error, 'Impossible de supprimer ton compte pour le moment. Réessaie dans un instant.'));
+    if (data?.deleted !== true) throw new Error('La suppression n’a pas été confirmée par le serveur. Réessaie dans un instant.');
+    await supabase.auth.signOut();
+    alert('Ton compte et tes données ont bien été supprimés.');
+  } catch (error) {
+    alert(error?.message || 'Impossible de supprimer ton compte pour le moment. Réessaie dans un instant.');
+  } finally {
     deleteAccountButton.disabled = false;
     deleteAccountButton.textContent = 'Suppression';
-    return alert('Ta session a expiré. Reconnecte-toi puis réessaie.');
   }
-  const { error } = await supabase.functions.invoke('delete-account', {
-    method: 'POST',
-    headers: { Authorization: 'Bearer ' + session.access_token },
-  });
-  if (error) {
-    deleteAccountButton.disabled = false;
-    deleteAccountButton.textContent = 'Suppression';
-    return alert('Impossible de supprimer ton compte pour le moment. Réessaie dans un instant.');
-  }
-  await supabase.auth.signOut();
-  deleteAccountButton.disabled = false;
-  deleteAccountButton.textContent = 'Suppression';
-  alert('Ton compte et tes données ont bien été supprimés.');
 });
 showPrivacy.addEventListener('click', () => privacyDialog.showModal());
 closePrivacy.addEventListener('click', () => privacyDialog.close());
