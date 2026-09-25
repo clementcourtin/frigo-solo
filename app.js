@@ -64,10 +64,7 @@ function status(days) {
   if (days === 1) return ['soon', 'À consommer d’ici demain'];
   return days <= 3 ? ['soon', `À consommer d’ici ${days} jours`] : ['later', `À consommer d’ici ${days} jours`];
 }
-function quantityLabel(item) { const q = Number(item.quantity || 1), u = item.unit === 'unité' ? 'paquet' : (item.unit || 'paquet'); return `${q} ${u}${u === 'paquet' && q > 1 ? 's' : ''} · ${item.location || 'Frigo'}`; }
-function quantityStep(item) { return ['g', 'ml'].includes(item.unit) ? 100 : ['kg', 'L'].includes(item.unit) ? 0.1 : 1; }
-function quantityText(item) { const quantity = Number(item.quantity || 1), unit = item.unit === 'unité' ? 'paquet' : (item.unit || 'paquet'); return `${Number.isInteger(quantity) ? quantity : quantity.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')} ${unit}`; }
-function updateAddButton() { addFoodButton.textContent = `Ajouter au ${locationInput.value.toLowerCase()}`; }
+function displayUnit(unit, quantity) { const normalized = unit === 'unité' ? 'paquet' : (unit || 'paquet'); return normalized + (quantity > 1 && ['paquet', 'pot', 'bouteille'].includes(normalized) ? 's' : ''); } function quantityLabel(item) { const q = Number(item.quantity || 1); return q + ' ' + displayUnit(item.unit, q) + ' · ' + (item.location || 'Frigo'); } function quantityStep(item) { return ['g', 'ml'].includes(item.unit) ? 100 : ['kg', 'L'].includes(item.unit) ? 0.1 : 1; } function quantityText(item) { const quantity = Number(item.quantity || 1), displayQuantity = Number.isInteger(quantity) ? quantity : quantity.toFixed(2).replace(/0+$/, '').replace(/\.$/, ''); return displayQuantity + ' ' + displayUnit(item.unit, quantity); } function updateAddButton() { addFoodButton.textContent = `Ajouter au ${locationInput.value.toLowerCase()}`; }
 
 function render() {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
