@@ -1,4 +1,4 @@
-const CACHE_NAME = 'frigo-solo-v18';
+const CACHE_NAME = 'frigo-solo-v19';
 const APP_SHELL = [
   './',
   './index.html',
